@@ -35,8 +35,6 @@ type Transform = (TriadNodeLabel -> TriadNodeLabel)
 
 type Tone = ℤ / 12
 
--- notes :: [String]
--- notes = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
 
 notes :: [String]
 notes = [c, cs, d, ds, e, f, fs, g, gs, a, as, b]
@@ -260,12 +258,23 @@ makePath tx origin =
 
 --   in listToMaybe matchingNodes
 
+-- the Parallel transformation exchanges a triad for its Parallel. 
+-- In a Major Triad move the third down a semitone (C major to C minor), 
+-- in a Minor Triad move the third up a semitone (C minor to C major)
+-- transformation moves the root note up or down a half step
 p :: TriadNodeLabel -> TriadNodeLabel
 p = makePath Parallel
 
+
+-- The Relative ransformation exchanges a triad for its Relative. 
+-- In a Major Triad move the fifth up a tone (C major to A minor), 
+-- in a Minor Triad move the root down a tone (A minor to C major)
 r :: TriadNodeLabel -> TriadNodeLabel
 r = makePath Relative
 
+-- the Leading tone transformation exchanges a triad for its Leading-Tone Exchange. 
+-- In a Major Triad the root moves down by a semitone (C major to E minor), 
+-- in a Minor Triad the fifth moves up by a semitone (E minor to C major)
 l :: TriadNodeLabel -> TriadNodeLabel
 l = makePath Leading
 
@@ -312,37 +321,8 @@ findChordProgression start (hd : tl) =
 printFlat :: [[String]] -> IO ()
 printFlat ns = mapM_ putStrLn (concat ns)
 
--- -- | Randomly shuffle a list
--- --   /O(N)/
--- shuffle :: [a] -> IO [a]
--- shuffle xs = do
---   ar <- newArray n xs
---   forM [1 .. n] $ \i -> do
---     j <- randomRIO (i, n)
---     vi <- readArray ar i
---     vj <- readArray ar j
---     writeArray ar j vi
---     return vj
---   where
---     n = length xs
---     newArray :: Int -> [a] -> IO (IOArray Int a)
---     newArray n = newListArray (1, n)
-
--- fisherYatesStep :: RandomGen g => (Map.Map Int a, g) -> (Int, a) -> (Map.Map Int a, g)
--- fisherYatesStep (m, gen) (i, x) = ((Map.insert j x . Map.insert i (m Map.! j)) m, gen')
---   where
---     (j, gen') = randomR (0, i) gen
-
--- fisherYates :: RandomGen g => g -> [a] -> ([a], g)
--- fisherYates gen [] = ([], gen)
--- fisherYates gen l =
---   toElems $ foldl fisherYatesStep (initial (head l) gen) (numerate (tail l))
---   where
---     toElems (x, y) = (Map.elems x, y)
---     numerate = zip [1 ..]
---     initial x gen = (Map.singleton 0 x, gen)
-
 transforms :: [TriadNodeLabel -> TriadNodeLabel]
 transforms = [p, r, l, slide, lp, pl, pr, rp, hexapole, prl, nebenverwandt]
 
+transformNames :: [String]
 transformNames = ["p", "r", "l", "slide", "lp", "pl", "pr", "rp", "hexapole", "prl", "nebenverwandt"]

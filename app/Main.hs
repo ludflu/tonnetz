@@ -1,14 +1,12 @@
 module Main where
 
 import ChordGraph
-import System.Random
-  ( Random (randomR),
-    RandomGen,
-    getStdGen,
-    initStdGen,
-  )
 import FisherYates
   ( fisherYates,
+  )
+import System.Random
+  ( StdGen,
+    initStdGen,
   )
   
 main :: IO ()
