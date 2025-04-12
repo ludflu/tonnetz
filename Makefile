@@ -1,5 +1,8 @@
 run:
-	cabal run tonnetz -- -o out.svg
+	cabal run tonnetz -- \
+		--width 150 \
+		--height 150 \
+		-o out.svg
 
 test:
 	cabal test

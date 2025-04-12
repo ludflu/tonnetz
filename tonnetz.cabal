@@ -69,6 +69,10 @@ executable tonnetz
 
     -- Other library packages from which modules are imported.
     other-modules: ChordGraph
+                 , TonnetzGraph
+                 , TonnetzCommands
+                 , Tonnetz
+                 , FisherYates
     build-depends:    base ^>=4.17.2.1
         , modular-arithmetic
         , diagrams-lib
@@ -81,6 +85,7 @@ executable tonnetz
         , matrix
         , text
         , hashable
+        , optparse-applicative
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib

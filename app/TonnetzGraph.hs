@@ -1,8 +1,7 @@
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE NoMonomorphismRestriction #-}
 
-module Main where
+module TonnetzGraph where
 
 import Data.Data (Typeable)
 import Data.Graph.Inductive (Edge, Gr, Graph (mkGraph), Node, edges, neighbors)
