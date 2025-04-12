@@ -2,8 +2,7 @@
 
 A Haskell program that generates parsimonious voice leading chord progressions using graph transformations on the dual of the tonnetz graph seen here:
 
-![image](https://github.com/user-attachments/assets/9d97563c-9487-4365-bcd9-0f97be6c7de0)
-
+![image](https://github.com/user-attachments/assets/9d97563c-9487-4365-bcd9-0f97be6c7de0 "credit Tilman Piesk https://commons.wikimedia.org/wiki/User:Watchduck")
 
 ## Overview
 
