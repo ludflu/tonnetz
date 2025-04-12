@@ -23,6 +23,7 @@ import Diagrams.Prelude (Diagram, P2, center, circle, p2, position, r2, text, tr
 import Tonnetz
 import ChordGraph (Tone, noteMap)
 import qualified Data.Modular (toMod)
+import Data.Bifunctor (bimap)
 
 type NoteGraph = Gr NodeLabel EdgeLabel
 
@@ -99,7 +100,7 @@ myNeighbors tg i =
    in map (nodeLookup' Map.!) ns
 
 justNotes :: (RealFrac a, Enum a) => [NodeLabel] -> [((a, a), Integer)]
-justNotes = map (\ (xy, n) -> (realTuple xy,  toInteger n))
+justNotes = map (bimap realTuple toInteger)
 
 circleAtPoint :: ((Double, Double), Integer) -> Diagram B
 circleAtPoint ((x, y), n) =
