@@ -70,9 +70,9 @@ threeClicks g =
       orderedTriads = map (DL.sort . makeTones) triadLists
    in map showTriad $ sortUniq orderedTriads
 
-noteFromIndex :: Int -> Int
+noteFromIndex :: Int -> Tone
 noteFromIndex idx =
-  let (cord, tone) = nodeLookup' Map.! idx
+  let ((_, _), tone) = nodeLookup' Map.! idx
    in tone
 
 noteFromTone :: Tone -> String
@@ -104,8 +104,7 @@ circleAtPoint :: ((Double, Double), Integer) -> Diagram B
 circleAtPoint ((x, y), n) =
   let n' :: Tone = toMod n
       noteName = noteMap Map.! n' -- unsafe!
-   in ( circle 0.75
-          <> (center $ text $ noteName)
+   in ( circle 0.75 <> center (text  noteName)
       )
         # translate (r2 (x, y))
 

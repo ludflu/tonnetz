@@ -141,11 +141,11 @@ noteMap' = Map.fromList $ zip notes [0 .. 11]
 
 mapTriad' :: [String] -> Triad
 mapTriad' notes =
-  let (a, b, c) = (notes !! 0, notes !! 1, notes !! 2)
+  let (a, b, c) = (head notes, notes !! 1, notes !! 2)
    in (noteMap' Map.! a, noteMap' Map.! b, noteMap' Map.! c)
 
-debugHead :: [a] -> a
-debugHead l = l !! 0
+-- debugHead :: [a] -> a
+-- debugHead l = l !! 0
 
 hasEdge :: TriadNodeLabel -> TriadNodeLabel -> Bool
 hasEdge triad1 triad2 =
@@ -161,7 +161,7 @@ neighborChords =
    in map cfinder notetriads
 
 makePairs :: a -> [a] -> [(a, a)]
-makePairs item = map (\f -> (f, item))
+makePairs item = map (, item)
 
 triadEdges :: [([String], [String])]
 triadEdges =
@@ -247,7 +247,7 @@ makePath tx origin =
       edges = G.out triadGraph originIdx
       matchingEdges = filter (matchTriadicTransform tx) edges
       matchingNodes = map (\(from, to, label) -> nodeLookup' Map.! to) matchingEdges
-   in debugHead matchingNodes
+   in head matchingNodes
 
 --   in listToMaybe matchingNodes
 
