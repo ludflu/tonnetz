@@ -22,6 +22,7 @@ import Diagrams.Backend.SVG.CmdLine (B, mainWith)
 import Diagrams.Prelude (Diagram, P2, center, circle, p2, position, r2, text, translate, (#))
 import Tonnetz
 import ChordGraph (Tone, noteMap)
+import qualified Data.Modular (toMod)
 
 type NoteGraph = Gr NodeLabel EdgeLabel
 
@@ -55,7 +56,7 @@ makeThreeTuples (from, to) = map (from, to,)
 -- 1. for each edge in the graph
 -- 2. for both vertices in the edge
 -- 3. find the neighbor vertices in common
--- 4 for each neighbor vertex in common, record a 3-tuple of the vertices in the edge + the common neighbor
+-- 4. for each neighbor vertex in common, record a 3-tuple of the vertices in the edge + the common neighbor
 -- 5. sort each 3-tuple by value
 -- 6. dedupe the list
 
@@ -73,7 +74,7 @@ threeClicks g =
 noteFromIndex :: Int -> Tone
 noteFromIndex idx =
   let ((_, _), tone) = nodeLookup' Map.! idx
-   in tone
+   in toMod $ fromIntegral tone
 
 noteFromTone :: Tone -> String
 noteFromTone idx = noteMap Map.! idx
