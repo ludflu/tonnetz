@@ -88,3 +88,22 @@ executable tonnetz
     -- Base language which the package is written in.
     default-language: GHC2021
 
+Test-Suite tonnetez-tests
+  type: exitcode-stdio-1.0
+  other-modules: ChordGraph
+  build-depends:    base
+                    ,containers
+                    ,hashable
+                    ,text
+                    ,fgl
+                    ,random
+                    ,filepath
+                    ,matrix
+                    ,Unique
+                    ,modular-arithmetic
+                    ,array
+                    ,tasty
+                    ,tasty-hunit
+  hs-source-dirs:
+      tests, lib
+  main-is: TonnetzTests.hs
