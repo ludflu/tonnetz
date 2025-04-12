@@ -205,6 +205,8 @@ findChanged' t1 t2 =
       changeInterval = findChanged t1' t2'
    in describeTransform t1' t2'
 
+-- this function takes two triads and finds the changed note
+-- it returns the interval between the changed note and the original note
 findChanged :: Triad -> Triad -> Maybe Tone
 findChanged t1 t2 =
   let as :: [Tone] = untuple t1
@@ -217,6 +219,13 @@ findChanged t1 t2 =
         n2 <- listToMaybe tnote2
         return $ toneInterval n2 n1
 
+-- this function will take the interval (expressed as a module 12 integer) and
+-- the boolean value of whether the root note is different
+-- and return the type of transformation
+-- if the interval is 2 or 10, it is a relative transformation
+-- if the interval is 1 or 11, it is a leading transformation
+-- if the interval is 0 or 12, it is a parallel transformation (unison or octave)
+-- otherwise Nothing
 makeTxform :: Tone -> Bool -> Maybe TriadicTransform
 makeTxform delta rootDiffers
   | delta == 2 || delta == 10 = Just Relative
@@ -232,8 +241,7 @@ describeTransform t1 t2 =
       rootDiffers = r1 /= r2
    in do
         d <- delta
-        tfm <- makeTxform d rootDiffers
-        return tfm
+        makeTxform d rootDiffers
 
 third :: (a, b, c) -> c
 third (_, _, c) = c
@@ -304,35 +312,35 @@ findChordProgression start (hd : tl) =
 printFlat :: [[String]] -> IO ()
 printFlat ns = mapM_ putStrLn (concat ns)
 
--- | Randomly shuffle a list
---   /O(N)/
-shuffle :: [a] -> IO [a]
-shuffle xs = do
-  ar <- newArray n xs
-  forM [1 .. n] $ \i -> do
-    j <- randomRIO (i, n)
-    vi <- readArray ar i
-    vj <- readArray ar j
-    writeArray ar j vi
-    return vj
-  where
-    n = length xs
-    newArray :: Int -> [a] -> IO (IOArray Int a)
-    newArray n = newListArray (1, n)
+-- -- | Randomly shuffle a list
+-- --   /O(N)/
+-- shuffle :: [a] -> IO [a]
+-- shuffle xs = do
+--   ar <- newArray n xs
+--   forM [1 .. n] $ \i -> do
+--     j <- randomRIO (i, n)
+--     vi <- readArray ar i
+--     vj <- readArray ar j
+--     writeArray ar j vi
+--     return vj
+--   where
+--     n = length xs
+--     newArray :: Int -> [a] -> IO (IOArray Int a)
+--     newArray n = newListArray (1, n)
 
-fisherYatesStep :: RandomGen g => (Map.Map Int a, g) -> (Int, a) -> (Map.Map Int a, g)
-fisherYatesStep (m, gen) (i, x) = ((Map.insert j x . Map.insert i (m Map.! j)) m, gen')
-  where
-    (j, gen') = randomR (0, i) gen
+-- fisherYatesStep :: RandomGen g => (Map.Map Int a, g) -> (Int, a) -> (Map.Map Int a, g)
+-- fisherYatesStep (m, gen) (i, x) = ((Map.insert j x . Map.insert i (m Map.! j)) m, gen')
+--   where
+--     (j, gen') = randomR (0, i) gen
 
-fisherYates :: RandomGen g => g -> [a] -> ([a], g)
-fisherYates gen [] = ([], gen)
-fisherYates gen l =
-  toElems $ foldl fisherYatesStep (initial (head l) gen) (numerate (tail l))
-  where
-    toElems (x, y) = (Map.elems x, y)
-    numerate = zip [1 ..]
-    initial x gen = (Map.singleton 0 x, gen)
+-- fisherYates :: RandomGen g => g -> [a] -> ([a], g)
+-- fisherYates gen [] = ([], gen)
+-- fisherYates gen l =
+--   toElems $ foldl fisherYatesStep (initial (head l) gen) (numerate (tail l))
+--   where
+--     toElems (x, y) = (Map.elems x, y)
+--     numerate = zip [1 ..]
+--     initial x gen = (Map.singleton 0 x, gen)
 
 transforms :: [TriadNodeLabel -> TriadNodeLabel]
 transforms = [p, r, l, slide, lp, pl, pr, rp, hexapole, prl, nebenverwandt]

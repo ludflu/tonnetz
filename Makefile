@@ -5,4 +5,4 @@ test:
 	cabal test
 
 build:
-	build cabal build
+	cabal build
