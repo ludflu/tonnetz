@@ -71,7 +71,7 @@ executable tonnetz
     other-modules: ChordGraph
                  , TonnetzGraph
                  , TonnetzCommands
-                 , Tonnetz
+                 , TonnetzMatrix
                  , FisherYates
                  , NeoRiemann
     build-depends:    base ^>=4.17.2.1

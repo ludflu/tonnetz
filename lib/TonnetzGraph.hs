@@ -2,26 +2,19 @@
 
 module TonnetzGraph where
 
-import Data.Data (Typeable)
-import Data.Graph.Inductive (Edge, Gr, Graph (mkGraph), Node, edges, neighbors)
-import Data.Hashable
-import Data.Int (Int)
+import qualified Data.Graph.Inductive as G
 import qualified Data.List as DL
 import Data.List.Unique
 import qualified Data.Map as Map
-import qualified Data.Matrix as M
 import Data.Maybe
 import Data.Modular
-import qualified Data.Text.Lazy as L
-import Data.Tuple
 import Diagrams.Backend.SVG.CmdLine (B, mainWith)
-import Diagrams.Prelude (Diagram, P2, center, circle, p2, position, r2, text, translate, (#))
-import Tonnetz
+import Diagrams.Prelude (Diagram, center, circle, p2, position, r2, text, translate, (#))
+import TonnetzMatrix
 import ChordGraph (Tone, noteMap)
-import qualified Data.Modular (toMod)
 import Data.Bifunctor (bimap)
 
-type NoteGraph = Gr NodeLabel EdgeLabel
+type NoteGraph = G.Gr NodeLabel EdgeLabel
 
 nodeLookup :: Map.Map NodeLabel Int
 nodeLookup =
@@ -33,20 +26,20 @@ nodeLookup' =
   let notesWithIndex = zip [0 ..] allNotes
    in Map.fromList notesWithIndex
 
-toneGraph :: Graph gr => gr NodeLabel EdgeLabel
+toneGraph :: G.Graph gr => gr NodeLabel EdgeLabel
 toneGraph =
   let nodes = zip [0 ..] allNotes -- the index is required for the graph
       es = concatMap (\(x, y) -> fromMaybe [] (intervalEdges toneMatrix (x, y))) intcords
       edges = map (\(a, b) -> (nodeLookup Map.! a, nodeLookup Map.! b, 0)) es
-   in mkGraph nodes edges
+   in G.mkGraph nodes edges
 
-commonNeighbors :: NoteGraph -> Edge -> [Int]
+commonNeighbors :: NoteGraph -> G.Edge -> [Int]
 commonNeighbors g (from, to) =
-  let n1 = neighbors g from
-      n2 = neighbors g to
+  let n1 = G.neighbors g from
+      n2 = G.neighbors g to
    in DL.intersect n1 n2
 
-makeThreeTuples :: Edge -> [Int] -> [(Int, Int, Int)]
+makeThreeTuples :: G.Edge -> [Int] -> [(Int, Int, Int)]
 makeThreeTuples (from, to) = map (from, to,)
 
 -- given a graph, will return all the 3-cliques
@@ -59,7 +52,7 @@ makeThreeTuples (from, to) = map (from, to,)
 
 threeClicks :: NoteGraph -> [[String]]
 threeClicks g =
-  let es = edges g
+  let es = G.edges g
       ns = map (\edge -> (edge, commonNeighbors g edge)) es
       untuple (a, b, c) = [a, b, c]
       triads = concatMap (uncurry makeThreeTuples) ns
@@ -92,7 +85,7 @@ showTriad = map noteFromTone
 myNeighbors :: NoteGraph -> NodeLabel -> [NodeLabel]
 myNeighbors tg i =
   let i' = nodeLookup Map.! i
-      ns = neighbors tg i'
+      ns = G.neighbors tg i'
    in map (nodeLookup' Map.!) ns
 
 justNotes :: (RealFrac a, Enum a) => [NodeLabel] -> [((a, a), Integer)]
