@@ -40,7 +40,7 @@ drawMinorTriad triad = let (root, third, fifth) = triad
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
-                        in nodes #center <> triangle' # center
+                        in (nodes #center <> triangle' # center) # withEnvelope (triangle' #center)
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let (root, third, fifth) = triad
@@ -53,7 +53,7 @@ drawMajorTriad triad = let (root, third, fifth) = triad
                            nodes = thirdNode # translate  fup
                             <> fifthNode # translate  fdownRight 
                             <> rootNode #  translate  fdownLeft 
-                        in nodes #center <> triangle' # center 
+                        in (nodes # center <> triangle' # center)  # withEnvelope (triangle' # center)
 
 drawTriad :: Triad -> Diagram B
 drawTriad triad = let mood = findMood triad

@@ -1,18 +1,10 @@
 module Main where
 
-import FisherYates
-  ( fisherYates,
-  )
-import System.Random
-  ( initStdGen)
-import TonnetzCommands
-import Options.Applicative (execParser)
-import ChordGraph (transforms, printFlat, findChordProgression)
-import NeoRiemannGraph ( drawMinorTriad)
 import Diagrams.Backend.CmdLine (Mainable(mainWith))
 import NeoRiemann
 import NeoRiemannGraph 
 
+import Diagrams.Prelude
 -- computeProgressions :: IO ()
 -- computeProgressions =
 --   do
@@ -36,4 +28,4 @@ import NeoRiemannGraph
 
 main :: IO ()
 -- main = mainWith $ drawTriad cmajor
-main = mainWith $ drawTriad aminor
+main = mainWith $ drawTriad aminor 
