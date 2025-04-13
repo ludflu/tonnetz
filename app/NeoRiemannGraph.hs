@@ -2,20 +2,28 @@
 
 module NeoRiemannGraph where
 
-import NeoRiemann (Note, Triad)
-import Diagrams.Backend.SVG.CmdLine (B, mainWith)
-import Diagrams.Prelude (Diagram, center, circle, p2, position, r2, text, translate, (#))
-import Text.Show.Functions
+import NeoRiemann (Note, Triad, noteClass)
+import Diagrams.Backend.SVG.CmdLine (B)
+import Diagrams.Prelude 
 
 
-bla :: Note -> String
-bla = show
+drawNote :: Note -> Diagram B
+drawNote n = let noteTxt = show $ noteClass n
+                 node = circle 0.75 # center <> (text noteTxt # fc black) # center
+              in node # scale 0.25
 
-drawTonnetz :: Triad -> Diagram B
-drawTonnetz triad =
-  let (root, third, fifth) = triad
-   in circle 0.1 <> center (text  $ show root) 
-  --  # translate (r2 (0, 0)) 
+drawMinorTriad :: Triad -> Diagram B
+drawMinorTriad triad = let (root, third, fifth) = triad
+                           up = r2 (0,0.5)
+                           downLeft = up # rotateBy (1/3)
+                           downRight = up # rotateBy ((-1)/3)
+                           rootNode = drawNote root
+                           thirdNode = drawNote third
+                           fifthNode = drawNote fifth
+                        in thirdNode # translate up
+                            <> fifthNode # translate downRight
+                            <> rootNode # translate downLeft
+                            <> circle 0.1 # fc black # translate (r2 (0, 0))
+                         --  # translate (r2 (0, 0)) 
       -- <> center (text $ show third) # translate (r2 (1, 0))
       -- <> center (text $ show fifth) # translate (r2 (0, 1))
-   

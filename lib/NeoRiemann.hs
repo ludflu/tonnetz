@@ -49,8 +49,11 @@ lower = raise . negate
 calcInterval :: Note -> Note -> Interval
 calcInterval n1 n2 = calcSemitones n2 - calcSemitones n1
 
-makeTriad :: Note -> Triad
-makeTriad root = (root, raise majorThird root, raise perfectFifth root)
+makeMajorTriad :: Note -> Triad
+makeMajorTriad root = (root, raise majorThird root, raise perfectFifth root)
+
+makeMinorTriad :: Note -> Triad
+makeMinorTriad root = (root, raise minorThird root, raise perfectFifth root)
 
 
 findMood :: Triad -> Mood
@@ -95,4 +98,7 @@ c4 :: Note
 c4 = Note C 4                             
 
 cmajor :: Triad
-cmajor = makeTriad c4
+cmajor = makeMajorTriad c4
+
+aminor :: Triad
+aminor = makeMinorTriad (Note A 4)

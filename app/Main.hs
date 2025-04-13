@@ -8,24 +8,24 @@ import System.Random
 import TonnetzCommands
 import Options.Applicative (execParser)
 import ChordGraph (transforms, printFlat, findChordProgression)
-import NeoRiemannGraph (drawTonnetz)
+import NeoRiemannGraph ( drawMinorTriad)
 import Diagrams.Backend.CmdLine (Mainable(mainWith))
-import NeoRiemann (cmajor)
+import NeoRiemann
 
-computeProgressions :: IO ()
-computeProgressions =
-  do
-    gen <- initStdGen
-    let cmajor = ["C", "E", "G"]
-        (randomTransforms, _) = fisherYates gen transforms
-        path = take 4 randomTransforms
-        progression = cmajor : findChordProgression cmajor path
-    printFlat progression
+-- computeProgressions :: IO ()
+-- computeProgressions =
+--   do
+--     gen <- initStdGen
+--     let cmajor = ["A", "C", "E"]
+--         (randomTransforms, _) = fisherYates gen transforms
+--         path = take 4 randomTransforms
+--         progression = cmajor : findChordProgression cmajor path
+--     printFlat progression
 
-run :: CommandArgs -> IO ()
-run args = do
-  print args
-  mainWith $ drawTonnetz cmajor
+-- run :: CommandArgs -> IO ()
+-- run args = do
+--   print args
+--   mainWith $ drawMinorTriad aminor
 
 
 -- main :: IO ()
@@ -34,4 +34,4 @@ run args = do
 --   run args
 
 main :: IO ()
-main = mainWith $ drawTonnetz cmajor
+main = mainWith $ drawMinorTriad aminor
