@@ -35,4 +35,5 @@ import NeoRiemannGraph
 --   run args
 
 main :: IO ()
-main = mainWith $ drawTriad cmajor
+-- main = mainWith $ drawTriad cmajor
+main = mainWith $ drawTriad aminor

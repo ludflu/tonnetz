@@ -9,7 +9,7 @@ import Diagrams.Prelude
 
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
-                 node = (text noteTxt # fc black) # center <> circle 0.75 # fillColor white # center
+                 node = (text noteTxt # fc black) # center <> circle 0.75 # fc white # center
               in node # scale 0.25
 
 
@@ -24,9 +24,9 @@ convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
                           in p2 (x,y)
 
-closeShape :: [V2 Double] -> Diagram B 
-closeShape pts = let closedPts = map convertVectorToPoint pts                
-                  in strokeLoop (fromVertices closedPts) # fillColor red  
+closeShape :: (Color a) => [V2 Double] ->  a -> Diagram B 
+closeShape pts c = let closedPts = map convertVectorToPoint pts                
+                    in strokeLoop (fromVertices closedPts) # fillColor c  
 
 
                    
@@ -36,9 +36,11 @@ drawMinorTriad triad = let (root, third, fifth) = triad
                            rootNode = drawNote root
                            thirdNode = drawNote third
                            fifthNode = drawNote fifth
-                        in thirdNode # translate up
+                           triangle' = closeShape [up, downLeft, downRight, up] blue
+                           nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
+                        in nodes #center <> triangle' # center
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let (root, third, fifth) = triad
@@ -47,7 +49,7 @@ drawMajorTriad triad = let (root, third, fifth) = triad
                            rootNode = drawNote root
                            thirdNode = drawNote third
                            fifthNode = drawNote fifth
-                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup]
+                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red
                            nodes = thirdNode # translate  fup
                             <> fifthNode # translate  fdownRight 
                             <> rootNode #  translate  fdownLeft 
