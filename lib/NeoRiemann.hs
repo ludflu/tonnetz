@@ -1,14 +1,19 @@
-{-# LANGUAGE NoMonomorphismRestriction #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE TupleSections #-}
 
+module NeoRiemann where
 
-module TGraph where
+import Control.Arrow ( (>>>) )
 
 type Interval = Int
 
-data NoteClass = C | Cs| D| Ds | E | F| Fs | G | Gs | A | As | B
+data NoteClass = C | Cs| D| Ds | E | F | Fs | G | Gs | A | As | B
     deriving (Show, Eq, Ord, Enum)
+
+type Es = F
+type Bs = C
 
 data Note = Note { noteClass :: NoteClass, octave :: Int }
     deriving (Show, Eq, Ord)
@@ -17,6 +22,7 @@ data Mood = Major | Minor
     deriving (Show, Eq)
 
 type Triad = (Note, Note, Note)
+
 
 majorThird :: Interval
 majorThird = 4
@@ -76,6 +82,16 @@ leading (root, third, fifth) = let mood = findMood (root, third, fifth)
                                         in case mood of
                                             Major -> (lower 1 root, third, fifth)
                                             Minor -> (root, third, raise 1 fifth)   
+
+
+slide :: Triad -> Triad
+slide = leading >>> parallel >>> relative
+
+nebenverwandt :: Triad -> Triad
+nebenverwandt = relative >>> parallel >>> leading
+
+hexapole :: Triad -> Triad
+hexapole = leading >>> parallel >>> leading
 
 c4 :: Note
 c4 = Note C 4                             

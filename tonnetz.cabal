@@ -73,7 +73,7 @@ executable tonnetz
                  , TonnetzCommands
                  , Tonnetz
                  , FisherYates
-                 , TGraph
+                 , NeoRiemann
     build-depends:    base ^>=4.17.2.1
         , modular-arithmetic
         , diagrams-lib
