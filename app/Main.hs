@@ -11,6 +11,7 @@ import ChordGraph (transforms, printFlat, findChordProgression)
 import NeoRiemannGraph ( drawMinorTriad)
 import Diagrams.Backend.CmdLine (Mainable(mainWith))
 import NeoRiemann
+import NeoRiemannGraph 
 
 -- computeProgressions :: IO ()
 -- computeProgressions =
@@ -34,4 +35,4 @@ import NeoRiemann
 --   run args
 
 main :: IO ()
-main = mainWith $ drawMinorTriad aminor
+main = mainWith $ drawTriad cmajor
