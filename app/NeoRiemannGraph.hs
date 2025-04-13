@@ -9,7 +9,7 @@ import Diagrams.Prelude
 
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
-                 node = circle 0.75 # center <> (text noteTxt # fc black) # center
+                 node = (text noteTxt # fc black) # center <> circle 0.75 # fillColor white # center
               in node # scale 0.25
 
 
@@ -20,6 +20,16 @@ triangleVector = let up = r2 (0,0.5)
                   in (up, downLeft, downRight)
 
 
+convertVectorToPoint :: (Floating f) => V2 f -> P2 f
+convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
+                          in p2 (x,y)
+
+closeShape :: [V2 Double] -> Diagram B 
+closeShape pts = let closedPts = map convertVectorToPoint pts                
+                  in strokeLoop (fromVertices closedPts) # fillColor red  
+
+
+                   
 drawMinorTriad :: Triad -> Diagram B
 drawMinorTriad triad = let (root, third, fifth) = triad
                            (up,downLeft,downRight) = triangleVector
@@ -33,12 +43,15 @@ drawMinorTriad triad = let (root, third, fifth) = triad
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let (root, third, fifth) = triad
                            (up,downLeft,downRight) = triangleVector
+                           (fup,fdownLeft,fdownRight) = (up # reflectY ,downLeft # reflectY ,downRight# reflectY )
                            rootNode = drawNote root
                            thirdNode = drawNote third
                            fifthNode = drawNote fifth
-                        in thirdNode # translate  (up # reflectY)
-                            <> fifthNode # translate  (downRight # reflectY)
-                            <> rootNode #  translate  (downLeft # reflectY)
+                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup]
+                           nodes = thirdNode # translate  fup
+                            <> fifthNode # translate  fdownRight 
+                            <> rootNode #  translate  fdownLeft 
+                        in nodes #center <> triangle' # center 
 
 drawTriad :: Triad -> Diagram B
 drawTriad triad = let mood = findMood triad
