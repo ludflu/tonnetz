@@ -5,9 +5,12 @@ import FisherYates
   )
 import System.Random
   ( initStdGen)
-import TonnetzCommands ( CommandArgs, opts )
+import TonnetzCommands
 import Options.Applicative (execParser)
 import ChordGraph (transforms, printFlat, findChordProgression)
+import NeoRiemannGraph (drawTonnetz)
+import Diagrams.Backend.CmdLine (Mainable(mainWith))
+import NeoRiemann (cmajor)
 
 computeProgressions :: IO ()
 computeProgressions =
@@ -22,11 +25,13 @@ computeProgressions =
 run :: CommandArgs -> IO ()
 run args = do
   print args
+  mainWith $ drawTonnetz cmajor
 
-main :: IO ()
-main = do
-  args <- execParser opts
-  run args
 
 -- main :: IO ()
--- main = mainWith drawC
+-- main = do
+--   args <- execParser opts
+--   run args
+
+main :: IO ()
+main = mainWith $ drawTonnetz cmajor

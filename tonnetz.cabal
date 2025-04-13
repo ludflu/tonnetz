@@ -74,6 +74,8 @@ executable tonnetz
                  , TonnetzMatrix
                  , FisherYates
                  , NeoRiemann
+                 , NeoRiemannGraph
+                 
     build-depends:    base ^>=4.17.2.1
         , modular-arithmetic
         , diagrams-lib

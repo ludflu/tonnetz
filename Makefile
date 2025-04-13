@@ -1,3 +1,7 @@
+build:
+	cabal build
+
+
 run:
 	cabal run tonnetz -- \
 		--width 150 \
@@ -7,5 +11,4 @@ run:
 test:
 	cabal test
 
-build:
-	cabal build
+

@@ -5,21 +5,21 @@
 
 module ChordGraph (transforms, noteMap, Tone, findChordProgression, printFlat) where
 
-import Control.Arrow
-import Control.Monad (forM)
-import Data.Array.IO
-import Data.Graph.Inductive (Graph (match))
+import Control.Arrow ( (>>>) )
+-- import Control.Monad (forM)
+-- import Data.Array.IO
+-- import Data.Graph.Inductive (Graph (match))
 import qualified Data.Graph.Inductive as G
 import qualified Data.List as DL
 import Data.List.Unique (sortUniq)
 import qualified Data.Map as Map
 import Data.Maybe
 import Data.Modular (ℤ, type (/))
-import System.Random
-  ( RandomGen,
-    randomR,
-    randomRIO,
-  )
+-- import System.Random
+--   ( RandomGen,
+--     randomR,
+--     randomRIO,
+--   )
 
 data TriadicTransform = Leading | Relative | Parallel | Garbage deriving (Show, Eq, Ord)
 
