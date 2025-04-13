@@ -13,6 +13,7 @@ data NoteClass = C | Cs| D| Ds | E | F| Fs | G | Gs | A | As | B
     deriving (Show, Eq, Ord, Enum)
 
 data Note = Note { noteClass :: NoteClass, octave :: Int }
+    deriving (Show, Eq, Ord)
 
 calcSemitones :: Note -> Interval
 calcSemitones n =  let o = octave n
@@ -20,9 +21,11 @@ calcSemitones n =  let o = octave n
                     in fromEnum nc + 12 * o
 
 raise :: Interval -> Note -> Note
-raise i n = let o = octave n
-                nc = noteClass n
-             in Note (toEnum ((fromEnum nc + i) `mod` 12)) (o + (fromEnum nc + i) `div` 12)
+raise i n = let 
+                translatedNoteIdx = fromEnum (noteClass n) + i
+                translatedNote = toEnum (translatedNoteIdx `mod` 12)
+                translatedOctave = octave n + translatedNoteIdx `div` 12
+            in Note translatedNote translatedOctave
 
 
 calcInterval :: Note -> Note -> Interval
