@@ -3,7 +3,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE TupleSections #-}
 
-module ChordGraph where
+module ChordGraph (transforms, noteMap, Tone, findChordProgression, printFlat) where
 
 import Control.Arrow
 import Control.Monad (forM)
