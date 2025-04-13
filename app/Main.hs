@@ -11,6 +11,8 @@ import System.Random
 import TonnetzGraph qualified as TG
 import TonnetzCommands
 import Options.Applicative (execParser)
+import Diagrams.Backend.SVG.CmdLine (B, mainWith)
+import TGraph
 
 computeProgressions :: IO ()
 computeProgressions =
@@ -33,4 +35,5 @@ main = do
   args <- execParser opts
   run args
 
--- main = TG.main
+-- main :: IO ()
+-- main = mainWith drawC
