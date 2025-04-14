@@ -36,11 +36,11 @@ drawMinorTriad triad = let (root, third, fifth) = triad
                            rootNode = drawNote root
                            thirdNode = drawNote third
                            fifthNode = drawNote fifth
-                           triangle' = closeShape [up, downLeft, downRight, up] blue
+                           triangle' = closeShape [up, downLeft, downRight, up] blue # center
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
-                        in (nodes #center <> triangle' # center) # withEnvelope (triangle' #center)
+                        in (nodes # center <> triangle' ) # withEnvelope triangle' 
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let (root, third, fifth) = triad
@@ -49,11 +49,11 @@ drawMajorTriad triad = let (root, third, fifth) = triad
                            rootNode = drawNote root
                            thirdNode = drawNote third
                            fifthNode = drawNote fifth
-                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red
+                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red # center
                            nodes = thirdNode # translate  fup
                             <> fifthNode # translate  fdownRight
                             <> rootNode #  translate  fdownLeft
-                        in (nodes # center <> triangle' # center)  # withEnvelope (triangle' # center)
+                        in (nodes # center <> triangle' )  # withEnvelope triangle' 
 
 drawTriad :: Triad -> Diagram B
 drawTriad triad = let mood = findMood triad
@@ -83,7 +83,6 @@ moveDown t = case findMood t of
 
 
 drawTonnetez :: Triad -> Diagram B
-drawTonnetez t = (drawTriad ((moveLeft . moveUp) t) === drawTriad (moveLeft t) === drawTriad ((moveLeft . moveDown) t))
-                  ||| (drawTriad (moveUp t) === drawTriad t === drawTriad (moveDown t))
-                  ||| (drawTriad ((moveRight . moveUp) t) === drawTriad (moveRight t) === drawTriad ((moveRight . moveDown) t))
- 
+drawTonnetez t = (drawTriad ((moveLeft . moveUp) t) === drawTriad (moveLeft t) === drawTriad ((moveLeft . moveDown) t)) #snugR
+                  ||| (drawTriad (moveUp t) === drawTriad t === drawTriad (moveDown t)) #snugL
+                  -- ||| (drawTriad ((moveRight . moveUp) t) === drawTriad (moveRight t) === drawTriad ((moveRight . moveDown) t))
