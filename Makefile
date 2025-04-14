@@ -4,8 +4,8 @@ build:
 
 run:
 	cabal run tonnetz -- \
-		--width 150 \
-		--height 150 \
+		--width 1500 \
+		--height 1500 \
 		-o out.svg
 
 test:
