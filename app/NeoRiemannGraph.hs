@@ -84,8 +84,12 @@ moveDown t = case findMood t of
   Minor -> parallel t
 
 
+--TODO - there's got to be a good way to clean up this CRAZY
 drawTonnetez :: Triad -> Diagram B
-drawTonnetez t = let left = drawTriad ((moveLeft . moveUp) t) === drawTriad (moveLeft t) === drawTriad ((moveLeft . moveDown) t)
+drawTonnetez t = let 
+                     left2 = drawTriad ((moveLeft . moveLeft . moveUp) t) === drawTriad ((moveLeft . moveLeft) t) === drawTriad ((moveLeft . moveLeft . moveDown) t)
+                     left = drawTriad ((moveLeft . moveUp) t) === drawTriad (moveLeft t) === drawTriad ((moveLeft . moveDown) t)
                      middle = (drawTriad (moveUp t) === drawTriad t === drawTriad (moveDown t))
                      right = drawTriad ((moveRight . moveUp) t) === drawTriad (moveRight t) === drawTriad ((moveRight . moveDown) t)
-                  in (left #snugR <> middle #snugL) #snugR  <> right # snugL
+                     right2 = drawTriad ((moveRight . moveRight . moveUp) t) === drawTriad ((moveRight . moveRight) t) === drawTriad ((moveRight . moveRight . moveDown) t)
+                  in (((left2 #snugR  <> left #snugL) #snugR <> middle #snugL) #snugR <> right #snugL) #snugR <> right2 #snugL
