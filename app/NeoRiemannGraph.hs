@@ -85,6 +85,7 @@ moveDown t = case findMood t of
 
 
 drawTonnetez :: Triad -> Diagram B
-drawTonnetez t = (drawTriad ((moveLeft . moveUp) t) === drawTriad (moveLeft t) === drawTriad ((moveLeft . moveDown) t)) #snugR
-                  ||| (drawTriad (moveUp t) === drawTriad t === drawTriad (moveDown t)) #snugL
-                  -- ||| (drawTriad ((moveRight . moveUp) t) === drawTriad (moveRight t) === drawTriad ((moveRight . moveDown) t))
+drawTonnetez t = let left = drawTriad ((moveLeft . moveUp) t) === drawTriad (moveLeft t) === drawTriad ((moveLeft . moveDown) t)
+                     middle = (drawTriad (moveUp t) === drawTriad t === drawTriad (moveDown t))
+                     right = drawTriad ((moveRight . moveUp) t) === drawTriad (moveRight t) === drawTriad ((moveRight . moveDown) t)
+                  in (left #snugR <> middle #snugL) #snugR  <> right # snugL
