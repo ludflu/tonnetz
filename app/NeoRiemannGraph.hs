@@ -4,7 +4,7 @@ module NeoRiemannGraph where
 
 import NeoRiemann
 import Diagrams.Backend.SVG.CmdLine (B)
-import Diagrams.Prelude 
+import Diagrams.Prelude
 
 
 drawNote :: Note -> Diagram B
@@ -24,12 +24,12 @@ convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
                           in p2 (x,y)
 
-closeShape :: (Color a) => [V2 Double] ->  a -> Diagram B 
-closeShape pts c = let closedPts = map convertVectorToPoint pts                
-                    in strokeLoop (fromVertices closedPts) # fillColor c  
+closeShape :: (Color a) => [V2 Double] ->  a -> Diagram B
+closeShape pts c = let closedPts = map convertVectorToPoint pts
+                    in strokeLoop (fromVertices closedPts) # fillColor c
 
 
-                   
+
 drawMinorTriad :: Triad -> Diagram B
 drawMinorTriad triad = let (root, third, fifth) = triad
                            (up,downLeft,downRight) = triangleVector
@@ -51,8 +51,8 @@ drawMajorTriad triad = let (root, third, fifth) = triad
                            fifthNode = drawNote fifth
                            triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red
                            nodes = thirdNode # translate  fup
-                            <> fifthNode # translate  fdownRight 
-                            <> rootNode #  translate  fdownLeft 
+                            <> fifthNode # translate  fdownRight
+                            <> rootNode #  translate  fdownLeft
                         in (nodes # center <> triangle' # center)  # withEnvelope (triangle' # center)
 
 drawTriad :: Triad -> Diagram B
@@ -60,3 +60,29 @@ drawTriad triad = let mood = findMood triad
                        in case mood of
                            Major -> drawMajorTriad triad
                            Minor -> drawMinorTriad triad
+
+moveRight :: Triad -> Triad
+moveRight t = case findMood t of
+                  Major -> leading t
+                  Minor -> NeoRiemann.relative t
+
+moveLeft :: Triad -> Triad
+moveLeft t = case findMood t of
+               Major -> NeoRiemann.relative t
+               Minor -> leading t
+
+moveUp :: Triad -> Triad
+moveUp t = case findMood t of
+  Major -> parallel t
+  Minor -> slide t
+
+moveDown :: Triad -> Triad
+moveDown t = case findMood t of
+  Major -> slide t
+  Minor -> parallel t
+
+
+drawTonnetez :: Triad -> Diagram B
+drawTonnetez t = drawTriad (moveLeft t)
+               ||| drawTriad t
+              --  ||| drawTriad $ moveRight t

@@ -28,4 +28,4 @@ import Diagrams.Prelude
 
 main :: IO ()
 -- main = mainWith $ drawTriad cmajor
-main = mainWith $ drawTriad aminor 
+main = mainWith $ drawTonnetez cmajor 
