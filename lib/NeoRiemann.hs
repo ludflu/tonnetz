@@ -4,7 +4,6 @@
 module NeoRiemann where
 
 import Control.Arrow ( (>>>) )
-import Data.List (sortBy)
 
 type Interval = Int
 
@@ -59,10 +58,6 @@ makeMinorTriad :: Note -> Triad
 makeMinorTriad root = (root, raise minorThird root, raise perfectFifth root)
 
 
--- sortTuple :: (Note, Note, Note) -> (Note,Note,Note)
--- sortTuple (a,b,c) = let sorted = reverse $ sortBy (compare) [a,b,c] 
---                      in (head sorted, sorted !! 1, sorted !! 2)
-
 findMood :: Triad -> Mood
 findMood t@(root, third, fifth) = 
     let thirdInterval = calcInterval root third
@@ -111,11 +106,3 @@ nebenverwandt = relative >>> parallel >>> leading
 hexapole :: Triad -> Triad
 hexapole = leading >>> parallel >>> leading
 
-c4 :: Note
-c4 = Note C 4                             
-
-cmajor :: Triad
-cmajor = makeMajorTriad c4
-
-aminor :: Triad
-aminor = makeMinorTriad (Note A 4)

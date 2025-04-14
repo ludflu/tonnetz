@@ -26,6 +26,15 @@ import Diagrams.Prelude
 --   args <- execParser opts
 --   run args
 
+c4 :: Note
+c4 = Note C 4                             
+
+cmajor :: Triad
+cmajor = makeMajorTriad c4
+
+aminor :: Triad
+aminor = makeMinorTriad (Note A 4)
+
 main :: IO ()
 -- main = mainWith $ drawTriad cmajor
 main = mainWith $ drawTonnetez cmajor 
