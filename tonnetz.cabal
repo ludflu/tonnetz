@@ -68,8 +68,7 @@ executable tonnetz
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    other-modules: ChordGraph
-                 , TonnetzGraph
+    other-modules:                  
                  , TonnetzCommands
                  , TonnetzMatrix
                  , FisherYates
@@ -98,7 +97,14 @@ executable tonnetz
 
 Test-Suite tonnetez-tests
   type: exitcode-stdio-1.0
-  other-modules: ChordGraph
+  other-modules:                  
+                 , TonnetzCommands
+                 , TonnetzMatrix
+                 , FisherYates
+                 , NeoRiemann
+                 , NeoRiemannGraph
+                 , Tonnetz
+                 , TonnetzTests
   build-depends:    base
                     ,containers
                     ,hashable
