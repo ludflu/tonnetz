@@ -1,5 +1,5 @@
 {-# LANGUAGE NoMonomorphismRestriction #-}
-
+{-# LANGUAGE DataKinds #-}
 module NeoRiemannGraph where
 
 import NeoRiemann
@@ -83,13 +83,19 @@ moveDown t = case findMood t of
   Major -> slide t
   Minor -> parallel t
 
+makeTriadColumn :: [Triad] -> Diagram B
+makeTriadColumn ts = let triads = map drawTriad ts
+                      in foldl1 (===) triads
+
 
 --TODO - there's got to be a good way to clean up this CRAZY
 drawTonnetez :: Triad -> Diagram B
-drawTonnetez t = let 
-                     left2 = drawTriad ((moveLeft . moveLeft . moveUp) t) === drawTriad ((moveLeft . moveLeft) t) === drawTriad ((moveLeft . moveLeft . moveDown) t)
-                     left = drawTriad ((moveLeft . moveUp) t) === drawTriad (moveLeft t) === drawTriad ((moveLeft . moveDown) t)
-                     middle = (drawTriad (moveUp t) === drawTriad t === drawTriad (moveDown t))
-                     right = drawTriad ((moveRight . moveUp) t) === drawTriad (moveRight t) === drawTriad ((moveRight . moveDown) t)
-                     right2 = drawTriad ((moveRight . moveRight . moveUp) t) === drawTriad ((moveRight . moveRight) t) === drawTriad ((moveRight . moveRight . moveDown) t)
-                  in (((left2 #snugR  <> left #snugL) #snugR <> middle #snugL) #snugR <> right #snugL) #snugR <> right2 #snugL
+drawTonnetez t = let mu2 = moveUp . moveUp
+                     md2 = moveDown . moveDown
+                     ml2 = moveLeft . moveLeft
+                     mr2 = moveRight . moveRight
+                     seed = [mu2 t, moveUp t, t, moveDown t, md2 t]                     
+                     tonnetz :: [[Triad]] = [map ml2 seed, map moveLeft seed, seed, map moveRight seed, map mr2 seed]
+                     tcols ::[Diagram B] =  map makeTriadColumn tonnetz
+                     combineSnug l r = l # snugR <> r # snugL
+                  in foldl1 combineSnug tcols
