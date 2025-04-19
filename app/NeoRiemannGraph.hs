@@ -9,7 +9,7 @@ import Diagrams.Prelude
 
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
-                 node = (text noteTxt # fc black) # center <> circle 0.75 # fc white # center
+                 node = (text noteTxt # fc black # scale 0.75) # center <> circle 0.75 # fc white # center
               in node # scale 0.25
 
 
@@ -88,7 +88,6 @@ makeTriadColumn ts = let triads = map drawTriad ts
                       in foldl1 (===) triads
 
 
---TODO - there's got to be a good way to clean up this CRAZY
 drawTonnetez :: Triad -> Diagram B
 drawTonnetez t = let mu2 = moveUp . moveUp
                      md2 = moveDown . moveDown

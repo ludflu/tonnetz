@@ -8,7 +8,7 @@ import Control.Arrow ( (>>>) )
 type Interval = Int
 
 data NoteClass = C | Cs| D| Ds | E | F | Fs | G | Gs | A | As | B
-    deriving (Show, Eq, Ord, Enum)
+    deriving (Eq, Ord, Enum)
 
 type Es = F
 type Bs = C
@@ -21,6 +21,20 @@ data Mood = Major | Minor
 
 type Triad = (Note, Note, Note)
 
+instance Show NoteClass where
+    show :: NoteClass -> String
+    show C  = "C"
+    show Cs = "C#"
+    show D  = "D"
+    show Ds = "D#"
+    show E  = "E"
+    show F  = "F"
+    show Fs = "F#"
+    show G  = "G"
+    show Gs = "G#"
+    show A  = "A"
+    show As = "A#"
+    show B  = "B"
 
 majorThird :: Interval
 majorThird = 4
