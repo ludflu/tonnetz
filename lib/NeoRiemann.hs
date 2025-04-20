@@ -30,7 +30,7 @@ data Triad = Triad { root :: Note, third :: Note, fifth :: Note, breadcrumbs :: 
     deriving (Eq, Ord)
 
 instance Show Triad where
-    show (Triad r t f crumbs) = "Triad: " ++ show r ++ " " ++ show t ++ " " ++ show f 
+    show (Triad r t f crumbs) = "Triad: " ++ show r ++ " " ++ show t ++ " " ++ show f ++ " " ++ show (length crumbs)
 
 instance Show NoteClass where
     show :: NoteClass -> String
@@ -113,12 +113,6 @@ parallel triad@(Triad r t f crumbs) = let mood = findMood triad
                                            Major -> Triad r (lower 1 t) f $ removeDupes (Parallel : crumbs)
                                            Minor -> Triad r (raise 1 t) f $ removeDupes (Parallel : crumbs)
 
--- leaves no breadcrumbs
-parallel' :: Triad -> Triad
-parallel' triad@(Triad r t f crumbs) = let mood = findMood triad
-                                       in case mood of
-                                           Major -> Triad r (lower 1 t) f crumbs
-                                           Minor -> Triad r (raise 1 t) f crumbs
 
 
 -- The R transformation exchanges a triad for its Relative. 
@@ -131,12 +125,6 @@ relative triad@(Triad r t f crumbs) = let mood = findMood triad
                                            Minor -> Triad t f (lower 2 r) $ removeDupes (Relative : crumbs)
 
 
-relative' :: Triad -> Triad
-relative' triad@(Triad r t f crumbs) = let mood = findMood triad
-                                       in case mood of
-                                           Major -> Triad (raise 2 f) r t crumbs
-                                           Minor -> Triad t f (lower 2 r) crumbs
-
 
 -- The L transformation exchanges a triad for its Leading-Tone Exchange. 
 -- In a Major Triad the root moves down by a semitone (C major to E minor), 
@@ -148,19 +136,11 @@ leading triad@(Triad r t f crumbs) = let mood = findMood triad
                                          Minor -> Triad (raise 1 f) r t $ removeDupes (Leading : crumbs)
 
 
--- doesn't leave breadcrumbs
-leading' :: Triad -> Triad
-leading' triad@(Triad r t f crumbs) = let mood = findMood triad
-                                     in case mood of
-                                         Major -> Triad t f (lower 1 r) crumbs
-                                         Minor -> Triad (raise 1 f) r t crumbs
-
 
 slide :: Triad -> Triad
 slide triad@(Triad _ _ _ crumbs) = let tfm = leading >>> parallel >>> relative
                                        moved = tfm triad
-                                    in moved { breadcrumbs = removeDupes  crumbs }
-
+                                    in moved { breadcrumbs =  crumbs }
 
 
 nebenverwandt :: Triad -> Triad

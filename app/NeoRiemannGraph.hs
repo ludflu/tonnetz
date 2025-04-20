@@ -60,7 +60,7 @@ drawMajorTriad triad = let Triad r t f _ = triad
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
 labeled d Nothing = d
-labeled d (Just s) = d # opacity 0.5 <> text ("path: " ++ show s) # fontSize (local 0.1) # fc green # center --black # translate (r2 (0, -0.5)) # center
+labeled d (Just s) = d # opacity 0.5 <> text (show s) # fontSize (local 0.25) # fc green # center --black # translate (r2 (0, -0.5)) # center
 
 drawTriad ::  M.Map String Int -> Triad -> Diagram B
 drawTriad label triad = let mood = findMood triad
