@@ -35,6 +35,12 @@ data Mood = Major | Minor
 
 type Triad = (Note, Note, Note)
 
+-- data TrackedTriad = TrackedTriad
+--     { triad :: Triad
+--     , indx :: Int
+--     , transform :: Transform
+--     } deriving (Show, Eq)
+
 instance Show NoteClass where
     show :: NoteClass -> String
     show C  = "C"
@@ -87,7 +93,7 @@ makeMinorTriad root = (root, raise minorThird root, raise perfectFifth root)
 
 
 findMood :: Triad -> Mood
-findMood t@(root, third, fifth) =
+findMood (root, third, fifth) =
     let thirdInterval = calcInterval root third
         fifthInterval = calcInterval root fifth
     in if thirdInterval == majorThird && fifthInterval == perfectFifth
@@ -148,12 +154,4 @@ applyTransform Hexapole = hexapole
 applyTransforms :: Triad -> [Transform] -> [Triad]
 applyTransforms = scanl (flip applyTransform)
 
--- Apply a single transform n times to a triad
--- applyTransformN :: Int -> Transform -> Triad -> Triad
--- applyTransformN n t = iterateN n (applyTransform t)
-
--- Apply a single transform n times to a triad, returning a list of triads
--- including the original triad and each transformed version (n+1 total triads)
-applyTransformNWithSteps :: Int -> Transform -> Triad -> [Triad]
-applyTransformNWithSteps n t triad = scanl (\tri _ -> applyTransform t tri) triad [1..n]
 
