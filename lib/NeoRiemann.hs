@@ -7,7 +7,7 @@ import Control.Arrow ( (>>>) )
 
 type Interval = Int
 
-data Transform = L | P | R
+data Transform = Leading | Parallel | Relative | Slide | Nebenverwandt | Hexapole
   deriving (Show, Eq)
 
 data NoteClass = C | Cs| D| Ds | E | F | Fs | G | Gs | A | As | B
@@ -17,7 +17,10 @@ type Es = F
 type Bs = C
 
 data Note = Note { noteClass :: NoteClass, octave :: Int }
-    deriving (Show, Eq, Ord)
+    deriving (Eq, Ord)
+
+instance Show Note where
+    show (Note nc oct) = show nc ++ show oct
 
 data Mood = Major | Minor
     deriving (Show, Eq)
@@ -55,7 +58,7 @@ calcSemitones n =  let o = octave n
 
 
 raise :: Interval -> Note -> Note
-raise i n = let 
+raise i n = let
                 translatedNoteIdx = fromEnum (noteClass n) + i
                 translatedNote = toEnum (translatedNoteIdx `mod` 12)
                 translatedOctave = octave n + translatedNoteIdx `div` 12
@@ -76,7 +79,7 @@ makeMinorTriad root = (root, raise minorThird root, raise perfectFifth root)
 
 
 findMood :: Triad -> Mood
-findMood t@(root, third, fifth) = 
+findMood t@(root, third, fifth) =
     let thirdInterval = calcInterval root third
         fifthInterval = calcInterval root fifth
     in if thirdInterval == majorThird && fifthInterval == perfectFifth
@@ -102,7 +105,7 @@ relative :: Triad -> Triad
 relative (root, third, fifth) = let mood = findMood (root, third, fifth)
                                     in case mood of
                                         Major ->  (raise 2 fifth, root , third)
-                                        Minor ->  (third, fifth, lower 2 root)    
+                                        Minor ->  (third, fifth, lower 2 root)
 
 -- The L transformation exchanges a triad for its Leading-Tone Exchange. 
 -- In a Major Triad the root moves down by a semitone (C major to E minor), 
@@ -111,7 +114,7 @@ leading :: Triad -> Triad
 leading (root, third, fifth) = let mood = findMood (root, third, fifth)
                                         in case mood of
                                             Major ->   (third, fifth, lower 1 root)
-                                            Minor ->   (raise 1 fifth, root, third)   
+                                            Minor ->   (raise 1 fifth, root, third)
 
 
 slide :: Triad -> Triad
@@ -122,4 +125,18 @@ nebenverwandt = relative >>> parallel >>> leading
 
 hexapole :: Triad -> Triad
 hexapole = leading >>> parallel >>> leading
+
+-- Apply a single transform to a triad
+applyTransform :: Transform -> Triad -> Triad
+applyTransform Leading = leading
+applyTransform Parallel = parallel
+applyTransform Relative = relative
+applyTransform Slide = slide
+applyTransform Nebenverwandt = nebenverwandt
+applyTransform Hexapole = hexapole
+
+-- Apply a list of transforms to a triad, returning a list of triads
+-- including the original triad and each transformed version
+applyTransforms :: Triad -> [Transform] -> [Triad]
+applyTransforms = scanl (flip applyTransform)
 

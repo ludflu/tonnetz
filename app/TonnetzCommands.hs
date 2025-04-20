@@ -20,9 +20,12 @@ parseMood = eitherReader $ \s -> case s of
 
 parseTransform :: ReadM Transform
 parseTransform = eitherReader $ \s -> case s of
-  "L" -> Right L
-  "P" -> Right P 
-  "R" -> Right R
+  "L" -> Right Leading
+  "P" -> Right Parallel
+  "R" -> Right Relative
+  "N" -> Right Nebenverwandt
+  "S" -> Right Slide
+  "H" -> Right Hexapole  
   _   -> Left $ "Invalid transformation: " ++ s
 
 parseNoteClass :: ReadM NoteClass
@@ -47,7 +50,7 @@ commandArgs = CommandArgs
       ( long "key"
       <> short 'k' 
       <> metavar "key"
-      <> help "Root notes of the starting chord (e.g. C in 'C,E,G')")
+      <> help "Root note of the starting chord (e.g. C in 'C,E,G')")
   <*> option parseMood
       ( long "mood"
       <> short 'm'
@@ -57,7 +60,7 @@ commandArgs = CommandArgs
       ( long "transform"
       <> short 't'
       <> metavar "TRANSFORM"
-      <> help "Transformation to apply (L, P, or R)"))
+      <> help "Transformation to apply (L, P, or R, N, S, H)"))
 
 opts :: ParserInfo CommandArgs
 opts = info (commandArgs <**> helper)

@@ -28,8 +28,12 @@ run :: CommandArgs -> IO ()
 run args = do
   print args
   let startingTriad = makeTriad (startingKey args) (startingMood args)
+      triads = applyTransforms startingTriad (transformations args)
+      -- Print each triad along with its mood
+      -- Still render the tonnetz based on the starting triad
       tonnetz = drawTonnetez startingTriad
-   in renderSVG "tonnetz.svg" (mkWidth 500) tonnetz
+   in do _ <- mapM (\t -> putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)) triads
+         renderSVG "tonnetz.svg" (mkWidth 500) tonnetz
 
 main :: IO ()
 main = do
