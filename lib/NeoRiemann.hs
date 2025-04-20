@@ -7,6 +7,9 @@ import Control.Arrow ( (>>>) )
 
 type Interval = Int
 
+data Transform = L | P | R
+  deriving (Show, Eq)
+
 data NoteClass = C | Cs| D| Ds | E | F | Fs | G | Gs | A | As | B
     deriving (Eq, Ord, Enum)
 

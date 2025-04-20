@@ -8,9 +8,15 @@ import NeoRiemann
 
 data CommandArgs = CommandArgs
   { startingKey :: NoteClass,
-    -- startingMood :: Mood,
+     startingMood :: Mood,
    transformations :: [Transform]
   } deriving (Show)
+
+parseMood :: ReadM Mood 
+parseMood = eitherReader $ \s -> case s of
+  "major" -> Right Major
+  "minor" -> Right Minor
+  _       -> Left $ "Invalid mood: " ++ s
 
 parseTransform :: ReadM Transform
 parseTransform = eitherReader $ \s -> case s of
@@ -42,6 +48,11 @@ commandArgs = CommandArgs
       <> short 'k' 
       <> metavar "key"
       <> help "Root notes of the starting chord (e.g. C in 'C,E,G')")
+  <*> option parseMood
+      ( long "mood"
+      <> short 'm'
+      <> metavar "mood"
+      <> help "Mood of the starting chord (major or minor)")
   <*> many (option parseTransform
       ( long "transform"
       <> short 't'
