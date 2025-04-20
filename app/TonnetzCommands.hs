@@ -9,7 +9,8 @@ import NeoRiemann
 data CommandArgs = CommandArgs
   { startingKey :: NoteClass,
      startingMood :: Mood,
-   transformations :: [Transform]
+   transformations :: [Transform],
+   contextSize :: Int
   } deriving (Show)
 
 parseMood :: ReadM Mood
@@ -87,6 +88,12 @@ commandArgs = CommandArgs
       <> short 't'
       <> metavar "TRANSFORMS"
       <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H)")
+  <*> option auto
+      ( long "context"
+      <> short 'c'
+      <> metavar "CONTEXT"
+      <> value 5
+      <> help "Context size for the transformations (default: 4)")
 
 opts :: ParserInfo CommandArgs
 opts = info (commandArgs <**> helper)

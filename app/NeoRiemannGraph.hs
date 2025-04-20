@@ -90,15 +90,15 @@ makeTriadColumn ts = let triads = map drawTriad ts
 ctf :: [Triad] -> [Triad -> Triad] -> [[Triad]]
 ctf ts = map (`map` ts)
 
-drawTonnetez :: Triad -> Diagram B
-drawTonnetez t = let ups :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveUp) (reverse [1..10])
-                     downs :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveDown)  [1..10]                  
-                     -- this is the middle column
-                     seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs)
-                     lefts :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveLeft) (reverse [1..10])
-                     rights :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveRight) [1..10]
-                     columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
-                     tonnetz = ctf seed columnTransforms
-                     tcols ::[Diagram B] =  map makeTriadColumn tonnetz
-                     combineSnug l r = l # snugR <> r # snugL
-                  in foldl1 combineSnug tcols
+drawTonnetez :: Triad -> Int -> Diagram B
+drawTonnetez t contextSize = let ups :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveUp) (reverse [1..contextSize])
+                                 downs :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveDown)  [1..contextSize]                  
+                                -- this is the middle column
+                                 seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs)
+                                 lefts :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveLeft) (reverse [1..contextSize])
+                                 rights :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveRight) [1..contextSize]
+                                 columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
+                                 tonnetz = ctf seed columnTransforms
+                                 tcols ::[Diagram B] =  map makeTriadColumn tonnetz
+                                 combineSnug l r = l # snugR <> r # snugL
+                              in foldl1 combineSnug tcols
