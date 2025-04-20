@@ -60,8 +60,8 @@ drawMajorTriad triad = let (root, third, fifth) = triad
 drawTriad :: Triad -> Diagram B
 drawTriad triad = let mood = findMood triad
                        in case mood of
-                           Major -> drawMajorTriad triad
-                           Minor -> drawMinorTriad triad
+                           Major -> drawMajorTriad triad # named (show triad)
+                           Minor -> drawMinorTriad triad # named (show triad)
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of

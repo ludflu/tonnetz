@@ -35,6 +35,12 @@ data Mood = Major | Minor
 
 type Triad = (Note, Note, Note)
 
+-- data TrackedTriad = TrackedTriad
+--     { triad :: Triad
+--     , indx :: Int
+--     , transform :: Transform
+--     } deriving (Show, Eq)
+
 instance Show NoteClass where
     show :: NoteClass -> String
     show C  = "C"
