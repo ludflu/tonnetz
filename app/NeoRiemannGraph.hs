@@ -31,11 +31,11 @@ closeShape pts c = let closedPts = map convertVectorToPoint pts
 
 
 drawMinorTriad :: Triad -> Diagram B
-drawMinorTriad triad = let (root, third, fifth) = triad
+drawMinorTriad triad = let Triad r t f = triad
                            (up,downLeft,downRight) = triangleVector
-                           rootNode = drawNote root
-                           thirdNode = drawNote third
-                           fifthNode = drawNote fifth
+                           rootNode = drawNote r
+                           thirdNode = drawNote t
+                           fifthNode = drawNote f
                            triangle' = closeShape [up, downLeft, downRight, up] blue # center
                           --  triangle' = triangle 1.0
                            nodes = thirdNode # translate up
@@ -44,12 +44,12 @@ drawMinorTriad triad = let (root, third, fifth) = triad
                         in (nodes # center <> triangle' ) # withEnvelope triangle'
 
 drawMajorTriad :: Triad -> Diagram B
-drawMajorTriad triad = let (root, third, fifth) = triad
+drawMajorTriad triad = let Triad r t f = triad
                            (up,downLeft,downRight) = triangleVector
                            (fup,fdownLeft,fdownRight) = (up # reflectY ,downLeft # reflectY ,downRight# reflectY )
-                           rootNode = drawNote root
-                           thirdNode = drawNote third
-                           fifthNode = drawNote fifth
+                           rootNode = drawNote r
+                           thirdNode = drawNote t
+                           fifthNode = drawNote f
                            triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red # center
                           --  triangle' = triangle 1.0 # reflectY
                            nodes = thirdNode # translate  fup

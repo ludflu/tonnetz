@@ -26,7 +26,11 @@ instance Show Note where
 data Mood = Major | Minor
     deriving (Show, Eq)
 
-type Triad = (Note, Note, Note)
+data Triad = Triad { root :: Note, third :: Note, fifth :: Note }
+    deriving (Eq, Ord)
+
+instance Show Triad where
+    show (Triad r t f) = show r ++ " " ++ show t ++ " " ++ show f
 
 instance Show NoteClass where
     show :: NoteClass -> String
@@ -73,49 +77,49 @@ calcInterval n1 n2 = let i = calcSemitones n2 - calcSemitones n1
                       in i `mod` 12
 
 makeMajorTriad :: Note -> Triad
-makeMajorTriad root = (root, raise majorThird root, raise perfectFifth root)
+makeMajorTriad r = Triad r (raise majorThird r) (raise perfectFifth r)
 
 makeMinorTriad :: Note -> Triad
-makeMinorTriad root = (root, raise minorThird root, raise perfectFifth root)
+makeMinorTriad r = Triad r (raise minorThird r) (raise perfectFifth r)
 
 
 findMood :: Triad -> Mood
-findMood (root, third, fifth) =
-    let thirdInterval = calcInterval root third
-        fifthInterval = calcInterval root fifth
+findMood (Triad r t f) =
+    let thirdInterval = calcInterval r t
+        fifthInterval = calcInterval r f
     in if thirdInterval == majorThird && fifthInterval == perfectFifth
        then Major
        else if thirdInterval == minorThird && fifthInterval == perfectFifth
             then Minor
-            else error $ "Invalid triad: " ++ show root ++ " " ++ show third ++ " " ++ show fifth
+            else error $ "Invalid triad: " ++ show r ++ " " ++ show t ++ " " ++ show f
 
 
 --- The P transformation exchanges a triad for its Parallel. 
 --- In a Major Triad move the third down a semitone (C major to C minor), 
 --- in a Minor Triad move the third up a semitone (C minor to C major)
 parallel :: Triad -> Triad
-parallel (root, third, fifth) = let mood = findMood (root, third, fifth)
+parallel triad@(Triad r t f) = let mood = findMood triad
                                 in case mood of
-                                    Major -> (root, lower 1 third, fifth)
-                                    Minor -> (root, raise 1 third, fifth)
+                                    Major -> Triad r (lower 1 t) f
+                                    Minor -> Triad r (raise 1 t) f
 
 -- The R transformation exchanges a triad for its Relative. 
 -- In a Major Triad move the fifth up a tone (C major to A minor), 
 -- in a Minor Triad move the root down a tone (A minor to C major)
 relative :: Triad -> Triad
-relative (root, third, fifth) = let mood = findMood (root, third, fifth)
-                                    in case mood of
-                                        Major ->  (raise 2 fifth, root , third)
-                                        Minor ->  (third, fifth, lower 2 root)
+relative triad@(Triad r t f) = let mood = findMood triad
+                                  in case mood of
+                                      Major -> Triad (raise 2 f) r t
+                                      Minor -> Triad t f (lower 2 r)
 
 -- The L transformation exchanges a triad for its Leading-Tone Exchange. 
 -- In a Major Triad the root moves down by a semitone (C major to E minor), 
 -- in a Minor Triad the fifth moves up by a semitone (E minor to C major)
 leading :: Triad -> Triad
-leading (root, third, fifth) = let mood = findMood (root, third, fifth)
-                                        in case mood of
-                                            Major ->   (third, fifth, lower 1 root)
-                                            Minor ->   (raise 1 fifth, root, third)
+leading triad@(Triad r t f) = let mood = findMood triad
+                                in case mood of
+                                    Major -> Triad t f (lower 1 r)
+                                    Minor -> Triad (raise 1 f) r t
 
 
 slide :: Triad -> Triad

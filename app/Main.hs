@@ -29,7 +29,7 @@ run args = do
       (randomTransforms, _) = fisherYates gen allTransformations
       tfs = case randomize args of 
         Just r -> take r randomTransforms
-        Nothing -> allTransformations
+        Nothing -> transformations args
       triads = applyTransforms startingTriad tfs
       triadNames =  map show triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
