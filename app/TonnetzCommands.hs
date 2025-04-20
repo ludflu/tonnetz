@@ -3,14 +3,13 @@
 module TonnetzCommands where
 
 import Options.Applicative
-import Data.Text (Text)
+import NeoRiemann
 
-data Transform = L | P | R
-  deriving (Show, Eq)
 
 data CommandArgs = CommandArgs
-  { startingChord :: String
-  , transformations :: [Transform]
+  { startingKey :: NoteClass,
+    -- startingMood :: Mood,
+   transformations :: [Transform]
   } deriving (Show)
 
 parseTransform :: ReadM Transform
@@ -20,13 +19,29 @@ parseTransform = eitherReader $ \s -> case s of
   "R" -> Right R
   _   -> Left $ "Invalid transformation: " ++ s
 
+parseNoteClass :: ReadM NoteClass
+parseNoteClass = eitherReader $ \s -> case s of
+  "C"  -> Right C
+  "Cs" -> Right Cs
+  "D"  -> Right D
+  "Ds" -> Right Ds
+  "E"  -> Right E
+  "F"  -> Right F
+  "Fs" -> Right Fs
+  "G"  -> Right G
+  "Gs" -> Right Gs
+  "A"  -> Right A
+  "As" -> Right As
+  "B"  -> Right B
+  _    -> Left $ "Invalid note class: " ++ s
+
 commandArgs :: Parser CommandArgs
 commandArgs = CommandArgs
-  <$> strOption
-      ( long "chord"
-      <> short 'c' 
-      <> metavar "CHORD"
-      <> help "Root notes of the starting chord (e.g. 'C,E,G')")
+  <$> option parseNoteClass
+      ( long "key"
+      <> short 'k' 
+      <> metavar "key"
+      <> help "Root notes of the starting chord (e.g. C in 'C,E,G')")
   <*> many (option parseTransform
       ( long "transform"
       <> short 't'
