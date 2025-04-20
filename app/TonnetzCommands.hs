@@ -19,14 +19,40 @@ parseMood = eitherReader $ \s -> case s of
   _       -> Left $ "Invalid mood: " ++ s
 
 parseTransform :: ReadM Transform
-parseTransform = eitherReader $ \s -> case s of
-  "L" -> Right Leading
-  "P" -> Right Parallel
-  "R" -> Right Relative
-  "N" -> Right Nebenverwandt
-  "S" -> Right Slide
-  "H" -> Right Hexapole  
-  _   -> Left $ "Invalid transformation: " ++ s
+parseTransform = eitherReader $ \s -> 
+  -- Check if input is a single character or a comma-delimited list
+  case s of
+    "L" -> Right Leading
+    "P" -> Right Parallel
+    "R" -> Right Relative
+    "N" -> Right Nebenverwandt
+    "S" -> Right Slide
+    "H" -> Right Hexapole
+    _ -> Left $ "Invalid transformation: " ++ s
+
+parseTransforms :: ReadM [Transform]
+parseTransforms = eitherReader $ \s -> 
+  -- Split input by commas and parse each character
+  let chars = filter (/= ' ') s  -- Remove any spaces
+      transformChars = if ',' `elem` chars then splitOnCommas chars else [chars]
+  in mapM parseSingleTransform transformChars
+  where
+    parseSingleTransform "L" = Right Leading
+    parseSingleTransform "P" = Right Parallel
+    parseSingleTransform "R" = Right Relative
+    parseSingleTransform "N" = Right Nebenverwandt
+    parseSingleTransform "S" = Right Slide
+    parseSingleTransform "H" = Right Hexapole
+    parseSingleTransform x   = Left $ "Invalid transformation: " ++ x
+    
+    splitOnCommas :: String -> [String]
+    splitOnCommas = foldr (\c acc -> 
+                            case acc of
+                              (cur:rest) -> if c == ',' 
+                                           then "":cur:rest 
+                                           else (c:cur):rest
+                              [] -> [""]  -- This case should never happen in practice
+                          ) [""] 
 
 parseNoteClass :: ReadM NoteClass
 parseNoteClass = eitherReader $ \s -> case s of
@@ -56,11 +82,11 @@ commandArgs = CommandArgs
       <> short 'm'
       <> metavar "mood"
       <> help "Mood of the starting chord (major or minor)")
-  <*> many (option parseTransform
+  <*> option parseTransforms
       ( long "transform"
       <> short 't'
-      <> metavar "TRANSFORM"
-      <> help "Transformation to apply (L, P, or R, N, S, H)"))
+      <> metavar "TRANSFORMS"
+      <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H)")
 
 opts :: ParserInfo CommandArgs
 opts = info (commandArgs <**> helper)
