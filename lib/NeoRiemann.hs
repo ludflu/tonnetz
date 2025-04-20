@@ -27,10 +27,8 @@ data Mood = Major | Minor
     deriving (Show, Eq)
 
 data Triad = Triad { root :: Note, third :: Note, fifth :: Note, breadcrumbs :: [Transform] }
-    deriving (Eq, Ord)
+    deriving (Eq, Ord, Show)
 
-instance Show Triad where
-    show (Triad r t f _) = show r ++ " " ++ show t ++ " " ++ show f
 
 instance Show NoteClass where
     show :: NoteClass -> String
@@ -123,19 +121,19 @@ leading triad@(Triad r t f crumbs) = let mood = findMood triad
 
 
 slide :: Triad -> Triad
-slide triad = let slidedTriad = (leading >>> parallel >>> relative) triad
-              in case slidedTriad of
-                   Triad r t f crumbs -> Triad r t f (Slide : crumbs)
+slide =  leading >>> parallel >>> relative 
+            --   in case slidedTriad of
+            --        Triad r t f crumbs -> Triad r t f (Slide : crumbs)
 
 nebenverwandt :: Triad -> Triad
-nebenverwandt triad = let transformedTriad = (relative >>> parallel >>> leading) triad
-                       in case transformedTriad of
-                            Triad r t f crumbs -> Triad r t f (Nebenverwandt : crumbs)
+nebenverwandt  = relative >>> parallel >>> leading
+                    --    in case transformedTriad of
+                    --         Triad r t f crumbs -> Triad r t f (Nebenverwandt : crumbs)
 
 hexapole :: Triad -> Triad
-hexapole triad = let transformedTriad = (leading >>> parallel >>> leading) triad
-                  in case transformedTriad of
-                       Triad r t f crumbs -> Triad r t f (Hexapole : crumbs)
+hexapole  = leading >>> parallel >>> leading
+                --   in case transformedTriad of
+                --        Triad r t f crumbs -> Triad r t f (Hexapole : crumbs)
 
 -- Apply a single transform to a triad
 applyTransform :: Transform -> Triad -> Triad
