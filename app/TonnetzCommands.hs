@@ -10,7 +10,8 @@ data CommandArgs = CommandArgs
   { startingKey :: NoteClass,
      startingMood :: Mood,
    transformations :: [Transform],
-   contextSize :: Int
+   contextSize :: Int,
+   randomize :: Maybe Int
   } deriving (Show)
 
 parseMood :: ReadM Mood
@@ -94,6 +95,11 @@ commandArgs = CommandArgs
       <> metavar "CONTEXT"
       <> value 5
       <> help "Context size for the transformations (default: 4)")
+  <*> optional (option auto
+      ( long "randomize"
+      <> short 'r'
+      <> metavar "RANDOMIZE"
+      <> help "Randomize the transformations (default: None)"))
 
 opts :: ParserInfo CommandArgs
 opts = info (commandArgs <**> helper)
