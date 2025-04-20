@@ -19,7 +19,7 @@ and then move to the Relative, which you can see labeled on the tonnetz diagram.
 This program takes a starting chord (C major by default) and applies a sequence of random transformations to generate a musical chord progression. The transformations are based on Neo-Riemannian theory and include operations like:
 
 - Parallel (P): Changes the chord quality between major and minor
-- Leading-tone exchange (L): Moves to the nearest chord sharing two common tones
+- Leading-tone exchange (L): For a Major Triad the root moves down by a semitone (C major to E minor), in a Minor Triad the fifth moves up by a semitone (E minor to C major)
 - Relative (R): Moves between relative major/minor chords
 
 ## Usage
