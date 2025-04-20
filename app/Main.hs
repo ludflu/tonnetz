@@ -22,6 +22,8 @@ makeTriad nc m = case m of
 allTransformations :: [Transform]
 allTransformations = [Leading, Parallel, Relative, Nebenverwandt, Slide, Hexapole]
 
+
+
 run :: CommandArgs -> IO ()
 run args = do
   gen <- initStdGen
@@ -32,7 +34,7 @@ run args = do
         Just r -> take r randomTransforms
         Nothing -> transformations args
       triads = applyTransforms startingTriad tfs
-      triadNames =  map show triads
+      triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
       tonnetz = drawTonnetez startingTriad (contextSize args) numberedTriads
    in do print tfs
