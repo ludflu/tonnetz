@@ -11,6 +11,7 @@ import Diagrams.Backend.SVG (renderSVG)
 import qualified Data.Map as M
 import System.Random (initStdGen)
 import FisherYates
+import Control.Monad (unless)
 
 makeTriad :: NoteClass -> Mood -> Triad
 makeTriad nc m = case m of
@@ -35,7 +36,10 @@ run args = do
       numberedTriads = M.fromList  $ zip triadNames [1..]
       tonnetz = drawTonnetez startingTriad (contextSize args) numberedTriads
    in do print tfs
-         mapM_ (\t -> putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)) triads
+         mapM_ (\t -> do
+                   putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)
+                   let Triad _ _ _ crumbs = t
+                   unless (null crumbs) $ putStrLn $ "  Breadcrumbs: " ++ show (reverse crumbs)) triads
          renderSVG "tonnetz.svg" (mkWidth 500) tonnetz
 
 main :: IO ()

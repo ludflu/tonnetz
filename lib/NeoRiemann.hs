@@ -9,7 +9,7 @@ import Control.Arrow ( (>>>) )
 type Interval = Int
 
 data Transform = Leading | Parallel | Relative | Slide | Nebenverwandt | Hexapole
-  deriving (Show, Eq)
+  deriving (Show, Eq, Ord)
 
 data NoteClass = C | Cs| D| Ds | E | F | Fs | G | Gs | A | As | B
     deriving (Eq, Ord, Enum)
@@ -26,11 +26,11 @@ instance Show Note where
 data Mood = Major | Minor
     deriving (Show, Eq)
 
-data Triad = Triad { root :: Note, third :: Note, fifth :: Note }
+data Triad = Triad { root :: Note, third :: Note, fifth :: Note, breadcrumbs :: [Transform] }
     deriving (Eq, Ord)
 
 instance Show Triad where
-    show (Triad r t f) = show r ++ " " ++ show t ++ " " ++ show f
+    show (Triad r t f _) = show r ++ " " ++ show t ++ " " ++ show f
 
 instance Show NoteClass where
     show :: NoteClass -> String
@@ -77,14 +77,14 @@ calcInterval n1 n2 = let i = calcSemitones n2 - calcSemitones n1
                       in i `mod` 12
 
 makeMajorTriad :: Note -> Triad
-makeMajorTriad r = Triad r (raise majorThird r) (raise perfectFifth r)
+makeMajorTriad r = Triad r (raise majorThird r) (raise perfectFifth r) []
 
 makeMinorTriad :: Note -> Triad
-makeMinorTriad r = Triad r (raise minorThird r) (raise perfectFifth r)
+makeMinorTriad r = Triad r (raise minorThird r) (raise perfectFifth r) []
 
 
 findMood :: Triad -> Mood
-findMood (Triad r t f) =
+findMood (Triad r t f _) =
     let thirdInterval = calcInterval r t
         fifthInterval = calcInterval r f
     in if thirdInterval == majorThird && fifthInterval == perfectFifth
@@ -98,38 +98,44 @@ findMood (Triad r t f) =
 --- In a Major Triad move the third down a semitone (C major to C minor), 
 --- in a Minor Triad move the third up a semitone (C minor to C major)
 parallel :: Triad -> Triad
-parallel triad@(Triad r t f) = let mood = findMood triad
-                                in case mood of
-                                    Major -> Triad r (lower 1 t) f
-                                    Minor -> Triad r (raise 1 t) f
+parallel triad@(Triad r t f crumbs) = let mood = findMood triad
+                                       in case mood of
+                                           Major -> Triad r (lower 1 t) f (Parallel : crumbs)
+                                           Minor -> Triad r (raise 1 t) f (Parallel : crumbs)
 
 -- The R transformation exchanges a triad for its Relative. 
 -- In a Major Triad move the fifth up a tone (C major to A minor), 
 -- in a Minor Triad move the root down a tone (A minor to C major)
 relative :: Triad -> Triad
-relative triad@(Triad r t f) = let mood = findMood triad
-                                  in case mood of
-                                      Major -> Triad (raise 2 f) r t
-                                      Minor -> Triad t f (lower 2 r)
+relative triad@(Triad r t f crumbs) = let mood = findMood triad
+                                       in case mood of
+                                           Major -> Triad (raise 2 f) r t (Relative : crumbs)
+                                           Minor -> Triad t f (lower 2 r) (Relative : crumbs)
 
 -- The L transformation exchanges a triad for its Leading-Tone Exchange. 
 -- In a Major Triad the root moves down by a semitone (C major to E minor), 
 -- in a Minor Triad the fifth moves up by a semitone (E minor to C major)
 leading :: Triad -> Triad
-leading triad@(Triad r t f) = let mood = findMood triad
-                                in case mood of
-                                    Major -> Triad t f (lower 1 r)
-                                    Minor -> Triad (raise 1 f) r t
+leading triad@(Triad r t f crumbs) = let mood = findMood triad
+                                     in case mood of
+                                         Major -> Triad t f (lower 1 r) (Leading : crumbs)
+                                         Minor -> Triad (raise 1 f) r t (Leading : crumbs)
 
 
 slide :: Triad -> Triad
-slide = leading >>> parallel >>> relative
+slide triad = let slidedTriad = (leading >>> parallel >>> relative) triad
+              in case slidedTriad of
+                   Triad r t f crumbs -> Triad r t f (Slide : crumbs)
 
 nebenverwandt :: Triad -> Triad
-nebenverwandt = relative >>> parallel >>> leading
+nebenverwandt triad = let transformedTriad = (relative >>> parallel >>> leading) triad
+                       in case transformedTriad of
+                            Triad r t f crumbs -> Triad r t f (Nebenverwandt : crumbs)
 
 hexapole :: Triad -> Triad
-hexapole = leading >>> parallel >>> leading
+hexapole triad = let transformedTriad = (leading >>> parallel >>> leading) triad
+                  in case transformedTriad of
+                       Triad r t f crumbs -> Triad r t f (Hexapole : crumbs)
 
 -- Apply a single transform to a triad
 applyTransform :: Transform -> Triad -> Triad

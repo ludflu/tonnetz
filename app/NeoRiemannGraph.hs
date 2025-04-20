@@ -4,6 +4,7 @@ module NeoRiemannGraph where
 
 import NeoRiemann
 import Diagrams.Backend.SVG.CmdLine (B)
+import Diagrams.Backend.SVG (renderSVG, svgTitle)
 import Diagrams.Prelude
 import qualified Data.Map as M
 
@@ -31,7 +32,7 @@ closeShape pts c = let closedPts = map convertVectorToPoint pts
 
 
 drawMinorTriad :: Triad -> Diagram B
-drawMinorTriad triad = let Triad r t f = triad
+drawMinorTriad triad = let Triad r t f _ = triad
                            (up,downLeft,downRight) = triangleVector
                            rootNode = drawNote r
                            thirdNode = drawNote t
@@ -44,7 +45,7 @@ drawMinorTriad triad = let Triad r t f = triad
                         in (nodes # center <> triangle' ) # withEnvelope triangle'
 
 drawMajorTriad :: Triad -> Diagram B
-drawMajorTriad triad = let Triad r t f = triad
+drawMajorTriad triad = let Triad r t f _ = triad
                            (up,downLeft,downRight) = triangleVector
                            (fup,fdownLeft,fdownRight) = (up # reflectY ,downLeft # reflectY ,downRight# reflectY )
                            rootNode = drawNote r
@@ -64,9 +65,14 @@ labeled d (Just s) = d # opacity 0.5 <> text ("path: " ++ show s) # fontSize (lo
 drawTriad ::  M.Map String Int -> Triad -> Diagram B
 drawTriad label triad = let mood = findMood triad
                             nbr = M.lookup (show triad) label
-                         in case mood of
-                             Major -> labeled (drawMajorTriad triad) nbr
-                             Minor -> labeled (drawMinorTriad triad) nbr
+                            Triad _ _ _ crumbs = triad
+                            breadcrumbStr = if null crumbs
+                                           then "No transformations"
+                                           else "Transformations: " ++ show (reverse crumbs)
+                            diag = case mood of
+                                     Major -> drawMajorTriad triad
+                                     Minor -> drawMinorTriad triad
+                         in labeled (diag # svgTitle breadcrumbStr) nbr
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of
