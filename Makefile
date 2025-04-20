@@ -1,8 +1,13 @@
+build:
+	cabal build
+
+
 run:
-	cabal run tonnetz -- -o out.svg
+	cabal run tonnetz -- \
+		--key C \
+		--mood major
 
 test:
 	cabal test
 
-build:
-	cabal build
+

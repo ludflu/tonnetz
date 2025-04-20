@@ -1,4 +1,4 @@
-module Tonnetz where
+module TonnetzMatrix where
 
 import qualified Data.List as DL
 import qualified Data.Map as Map
