@@ -30,7 +30,7 @@ data Triad = Triad { root :: Note, third :: Note, fifth :: Note, breadcrumbs :: 
     deriving (Eq, Ord)
 
 instance Show Triad where
-    show (Triad r t f crumbs) = "Triad: " ++ show r ++ " " ++ show t ++ " " ++ show f ++ " " ++ show (length crumbs)
+    show (Triad r t f crumbs) = "Triad: " ++ show r ++ " " ++ show t ++ " " ++ show f 
 
 instance Show NoteClass where
     show :: NoteClass -> String
