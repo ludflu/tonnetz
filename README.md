@@ -1,4 +1,6 @@
-![tonnetz](https://github.com/user-attachments/assets/568d55f2-3c69-4f24-8077-8fb7da06bcef)# Chord Progression Generator
+# Chord Progression Generator
+
+![tonnetz](https://github.com/user-attachments/assets/568d55f2-3c69-4f24-8077-8fb7da06bcef)
 
 A Haskell program that generates parsimonious voice leading chord progressions using graph transformations on a variation of the tonnetz graph seen here:
 
