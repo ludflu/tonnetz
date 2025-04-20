@@ -63,6 +63,7 @@ parseNoteClass = eitherReader $ \s -> case s of
   "D"  -> Right D
   "Ds" -> Right Ds
   "E"  -> Right E
+  "Es" -> Right F  -- Es is enharmonically equivalent to F
   "F"  -> Right F
   "Fs" -> Right Fs
   "G"  -> Right G
@@ -70,6 +71,7 @@ parseNoteClass = eitherReader $ \s -> case s of
   "A"  -> Right A
   "As" -> Right As
   "B"  -> Right B
+  "Bs" -> Right C -- Bs is enharmonically equivalent to C
   _    -> Left $ "Invalid note class: " ++ s
 
 commandArgs :: Parser CommandArgs
