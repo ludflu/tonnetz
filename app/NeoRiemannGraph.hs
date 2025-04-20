@@ -41,7 +41,7 @@ drawMinorTriad triad = let (root, third, fifth) = triad
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
-                        in (nodes # center <> triangle' ) # withEnvelope triangle' 
+                        in (nodes # center <> triangle' ) # withEnvelope triangle'
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let (root, third, fifth) = triad
@@ -87,14 +87,18 @@ makeTriadColumn :: [Triad] -> Diagram B
 makeTriadColumn ts = let triads = map drawTriad ts
                       in foldl1 (===) triads
 
+ctf :: [Triad] -> [Triad -> Triad] -> [[Triad]]
+ctf ts = map (`map` ts)
 
 drawTonnetez :: Triad -> Diagram B
-drawTonnetez t = let mu2 = moveUp . moveUp
-                     md2 = moveDown . moveDown
-                     ml2 = moveLeft . moveLeft
-                     mr2 = moveRight . moveRight
-                     seed = [mu2 t, moveUp t, t, moveDown t, md2 t]                     
-                     tonnetz :: [[Triad]] = [map ml2 seed, map moveLeft seed, seed, map moveRight seed, map mr2 seed]
+drawTonnetez t = let ups :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveUp) (reverse [1..10])
+                     downs :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveDown)  [1..10]                  
+                     -- this is the middle column
+                     seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs)
+                     lefts :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveLeft) (reverse [1..10])
+                     rights :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveRight) [1..10]
+                     columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
+                     tonnetz = ctf seed columnTransforms
                      tcols ::[Diagram B] =  map makeTriadColumn tonnetz
                      combineSnug l r = l # snugR <> r # snugL
                   in foldl1 combineSnug tcols

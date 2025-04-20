@@ -1,11 +1,19 @@
 module Main where
 
-import Diagrams.Backend.CmdLine (Mainable(mainWith))
 import NeoRiemann
-import NeoRiemannGraph 
+    ( findMood,
+      makeMajorTriad,
+      makeMinorTriad,
+      Mood(..),
+      Note(Note),
+      NoteClass,
+      Triad,
+      applyTransforms )
+import NeoRiemannGraph ( drawTonnetez )
 
-import Diagrams.Prelude
+import Diagrams.Prelude ( mkWidth )
 import TonnetzCommands
+    ( CommandArgs(transformations, startingKey, startingMood), opts )
 import Options.Applicative (execParser)
 import Diagrams.Backend.SVG (renderSVG)
 
@@ -32,7 +40,7 @@ run args = do
       -- Print each triad along with its mood
       -- Still render the tonnetz based on the starting triad
       tonnetz = drawTonnetez startingTriad
-   in do _ <- mapM (\t -> putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)) triads
+   in do mapM_ (\t -> putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)) triads
          renderSVG "tonnetz.svg" (mkWidth 500) tonnetz
 
 main :: IO ()

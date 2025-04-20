@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveDataTypeable #-}
+
 
 module TonnetzCommands where
 
@@ -12,14 +12,14 @@ data CommandArgs = CommandArgs
    transformations :: [Transform]
   } deriving (Show)
 
-parseMood :: ReadM Mood 
+parseMood :: ReadM Mood
 parseMood = eitherReader $ \s -> case s of
   "major" -> Right Major
   "minor" -> Right Minor
   _       -> Left $ "Invalid mood: " ++ s
 
 parseTransform :: ReadM Transform
-parseTransform = eitherReader $ \s -> 
+parseTransform = eitherReader $ \s ->
   -- Check if input is a single character or a comma-delimited list
   case s of
     "L" -> Right Leading
@@ -31,7 +31,7 @@ parseTransform = eitherReader $ \s ->
     _ -> Left $ "Invalid transformation: " ++ s
 
 parseTransforms :: ReadM [Transform]
-parseTransforms = eitherReader $ \s -> 
+parseTransforms = eitherReader $ \s ->
   -- Split input by commas and parse each character
   let chars = filter (/= ' ') s  -- Remove any spaces
       transformChars = if ',' `elem` chars then splitOnCommas chars else [chars]
@@ -44,15 +44,15 @@ parseTransforms = eitherReader $ \s ->
     parseSingleTransform "S" = Right Slide
     parseSingleTransform "H" = Right Hexapole
     parseSingleTransform x   = Left $ "Invalid transformation: " ++ x
-    
+
     splitOnCommas :: String -> [String]
-    splitOnCommas = foldr (\c acc -> 
+    splitOnCommas = foldr (\c acc ->
                             case acc of
-                              (cur:rest) -> if c == ',' 
-                                           then "":cur:rest 
+                              (cur:rest) -> if c == ','
+                                           then "":cur:rest
                                            else (c:cur):rest
                               [] -> [""]  -- This case should never happen in practice
-                          ) [""] 
+                          ) [""]
 
 parseNoteClass :: ReadM NoteClass
 parseNoteClass = eitherReader $ \s -> case s of
@@ -74,7 +74,7 @@ commandArgs :: Parser CommandArgs
 commandArgs = CommandArgs
   <$> option parseNoteClass
       ( long "key"
-      <> short 'k' 
+      <> short 'k'
       <> metavar "key"
       <> help "Root note of the starting chord (e.g. C in 'C,E,G')")
   <*> option parseMood

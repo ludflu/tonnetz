@@ -5,6 +5,14 @@ module NeoRiemann where
 
 import Control.Arrow ( (>>>) )
 
+-- | Compose a function with itself n times
+-- For n = 0, returns the identity function
+-- For n > 0, returns f composed with itself n times
+iterateN :: (a -> a) -> Int -> (a -> a)
+iterateN  _ 0 = id
+iterateN  f 1 = f
+iterateN  f n = f . iterateN f (n-1) 
+
 type Interval = Int
 
 data Transform = Leading | Parallel | Relative | Slide | Nebenverwandt | Hexapole
@@ -139,4 +147,13 @@ applyTransform Hexapole = hexapole
 -- including the original triad and each transformed version
 applyTransforms :: Triad -> [Transform] -> [Triad]
 applyTransforms = scanl (flip applyTransform)
+
+-- Apply a single transform n times to a triad
+-- applyTransformN :: Int -> Transform -> Triad -> Triad
+-- applyTransformN n t = iterateN n (applyTransform t)
+
+-- Apply a single transform n times to a triad, returning a list of triads
+-- including the original triad and each transformed version (n+1 total triads)
+applyTransformNWithSteps :: Int -> Transform -> Triad -> [Triad]
+applyTransformNWithSteps n t triad = scanl (\tri _ -> applyTransform t tri) triad [1..n]
 
