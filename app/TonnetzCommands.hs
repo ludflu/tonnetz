@@ -87,7 +87,7 @@ commandArgs = CommandArgs
       ( long "transform"
       <> short 't'
       <> metavar "TRANSFORMS"
-      <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H)")
+      <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H) where:\n   L: Leading, P: Parallel, R: Relative, N: Nebenverwandt, S: Slide, H: Hexapole")
   <*> option auto
       ( long "context"
       <> short 'c'

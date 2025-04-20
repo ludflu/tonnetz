@@ -1,8 +1,16 @@
-# Chord Progression Generator
+# Tonnetz Traversals
+
+Generates parsimonious voice leading chord progressions using graph transformations on a variation of the tonnetz graph seen here:
 
 ![tonnetz](https://github.com/user-attachments/assets/568d55f2-3c69-4f24-8077-8fb7da06bcef)
 
-A Haskell program that generates parsimonious voice leading chord progressions using graph transformations on a variation of the tonnetz graph seen here:
+Above, starting in CMajor, we apply the Leading transform, followed by Parallel
+and then move to the Relative, which you can see labeled on the tonnetz diagram.
+
+    1. Triad: (C4,E4,G4) Mood: Major   (Origin)
+    2. Triad: (E4,G4,B3) Mood: Minor   (Leading Tone)
+    3. Triad: (E4,G#4,B3) Mood: Major  (Parallel)
+    4. Triad: (C#4,E4,G#4) Mood: Minor (Relative)
 
 ## Overview
 
@@ -14,9 +22,9 @@ This program takes a starting chord (C major by default) and applies a sequence 
 
 ## Usage
 
-tonnetz (-k|--key key) 
-        (-m|--mood mood) 
-        (-t|--transform TRANSFORMS)
+tonnetz (-k|--key key)
+        (-m|--mood mood major| minor)
+        (-t|--transform TRANSFORMS L,P,R,N,S,H)
         [-c|--context CONTEXT]
 
 Generate Chord paths through the Tonnetz via neo-reimann triad transformations
