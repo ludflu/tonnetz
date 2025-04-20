@@ -1,6 +1,6 @@
 # Tonnetz Traversals
 
-Generates parsimonious voice leading chord progressions using graph transformations on a variation of the tonnetz graph seen here:
+Generates parsimonious voice leading chord progressions using [neo-Riemann transformations](https://en.wikipedia.org/wiki/Neo-Riemannian_theory#Triadic_transformations_and_voice_leading) on triadic nodes the tonnetz graph seen here:
 
 ![tonnetz](https://github.com/user-attachments/assets/568d55f2-3c69-4f24-8077-8fb7da06bcef)
 
@@ -11,6 +11,8 @@ and then move to the Relative, which you can see labeled on the tonnetz diagram.
     2. Triad: (E4,G4,B3) Mood: Minor   (Leading Tone)
     3. Triad: (E4,G#4,B3) Mood: Major  (Parallel)
     4. Triad: (C#4,E4,G#4) Mood: Minor (Relative)
+
+[You can learn more about the tonnetz here.](https://en.wikipedia.org/wiki/Tonnetz)
 
 ## Overview
 
