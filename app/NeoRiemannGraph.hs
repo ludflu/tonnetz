@@ -4,6 +4,7 @@ module NeoRiemannGraph where
 
 import NeoRiemann
 import Diagrams.Backend.SVG.CmdLine (B)
+import Diagrams.Backend.SVG (renderSVG, svgTitle)
 import Diagrams.Prelude
 import qualified Data.Map as M
 
@@ -31,11 +32,11 @@ closeShape pts c = let closedPts = map convertVectorToPoint pts
 
 
 drawMinorTriad :: Triad -> Diagram B
-drawMinorTriad triad = let (root, third, fifth) = triad
+drawMinorTriad triad = let Triad r t f _ = triad
                            (up,downLeft,downRight) = triangleVector
-                           rootNode = drawNote root
-                           thirdNode = drawNote third
-                           fifthNode = drawNote fifth
+                           rootNode = drawNote r
+                           thirdNode = drawNote t
+                           fifthNode = drawNote f
                            triangle' = closeShape [up, downLeft, downRight, up] blue # center
                           --  triangle' = triangle 1.0
                            nodes = thirdNode # translate up
@@ -44,12 +45,12 @@ drawMinorTriad triad = let (root, third, fifth) = triad
                         in (nodes # center <> triangle' ) # withEnvelope triangle'
 
 drawMajorTriad :: Triad -> Diagram B
-drawMajorTriad triad = let (root, third, fifth) = triad
+drawMajorTriad triad = let Triad r t f _ = triad
                            (up,downLeft,downRight) = triangleVector
                            (fup,fdownLeft,fdownRight) = (up # reflectY ,downLeft # reflectY ,downRight# reflectY )
-                           rootNode = drawNote root
-                           thirdNode = drawNote third
-                           fifthNode = drawNote fifth
+                           rootNode = drawNote r
+                           thirdNode = drawNote t
+                           fifthNode = drawNote f
                            triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red # center
                           --  triangle' = triangle 1.0 # reflectY
                            nodes = thirdNode # translate  fup
@@ -59,14 +60,19 @@ drawMajorTriad triad = let (root, third, fifth) = triad
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
 labeled d Nothing = d
-labeled d (Just s) = d # opacity 0.5 <> text ("path: " ++ show s) # fontSize (local 0.1) # fc green # center --black # translate (r2 (0, -0.5)) # center
+labeled d (Just s) = d # opacity 0.5 <> text (show s) # fontSize (local 0.25) # fc green # center --black # translate (r2 (0, -0.5)) # center
 
 drawTriad ::  M.Map String Int -> Triad -> Diagram B
 drawTriad label triad = let mood = findMood triad
                             nbr = M.lookup (show triad) label
-                         in case mood of
-                             Major -> labeled (drawMajorTriad triad) nbr
-                             Minor -> labeled (drawMinorTriad triad) nbr
+                            Triad _ _ _ crumbs = triad
+                            breadcrumbStr = if null crumbs
+                                           then "No transformations"
+                                           else "Transformations: " ++ show (reverse crumbs)
+                            diag = case mood of
+                                     Major -> drawMajorTriad triad
+                                     Minor -> drawMinorTriad triad
+                         in labeled (diag # svgTitle breadcrumbStr) nbr
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of
@@ -95,13 +101,21 @@ makeTriadColumn labels ts = let triads = map (drawTriad labels) ts
 ctf :: [Triad] -> [Triad -> Triad] -> [[Triad]]
 ctf ts = map (`map` ts)
 
+-- | Compose a function with itself n times
+-- For n = 0, returns the identity function
+-- For n > 0, returns f composed with itself n times
+composeN :: (a -> a) -> Int -> (a -> a)
+composeN  _ 0 = id
+composeN  f 1 = f
+composeN  f n = f . composeN f (n-1) 
+
 drawTonnetez :: Triad -> Int -> M.Map String Int -> Diagram B
-drawTonnetez t contextSize labels = let ups :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveUp) (reverse [1..contextSize])
-                                        downs :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveDown)  [1..contextSize]                  
+drawTonnetez t contextSize labels = let ups :: [Triad -> Triad] = map (composeN  moveUp) (reverse [1..contextSize])
+                                        downs :: [Triad -> Triad] = map (composeN  moveDown)  [1..contextSize]                  
                                         -- this is the middle column
                                         seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs)
-                                        lefts :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveLeft) (reverse [1..contextSize])
-                                        rights :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveRight) [1..contextSize]
+                                        lefts :: [Triad -> Triad] = map (composeN  moveLeft) (reverse [1..contextSize])
+                                        rights :: [Triad -> Triad] = map (composeN  moveRight) [1..contextSize]
                                         columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
                                         tonnetz = ctf seed columnTransforms
                                         tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
