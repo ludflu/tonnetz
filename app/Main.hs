@@ -11,17 +11,6 @@ import Diagrams.Backend.SVG (renderSVG)
 import qualified Data.Map as M
 import System.Random (initStdGen)
 import FisherYates
-import GHC.Conc (orElse)
-import Data.Maybe
--- computeProgressions :: IO ()
--- computeProgressions =
---   do
---     gen <- initStdGen
---     let cmajor = ["A", "C", "E"]
---         (randomTransforms, _) = fisherYates gen transforms
---         path = take 4 randomTransforms
---         progression = cmajor : findChordProgression cmajor path
---     printFlat progression
 
 makeTriad :: NoteClass -> Mood -> Triad
 makeTriad nc m = case m of

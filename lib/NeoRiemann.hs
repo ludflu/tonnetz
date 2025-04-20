@@ -5,13 +5,6 @@ module NeoRiemann where
 
 import Control.Arrow ( (>>>) )
 
--- | Compose a function with itself n times
--- For n = 0, returns the identity function
--- For n > 0, returns f composed with itself n times
-iterateN :: (a -> a) -> Int -> (a -> a)
-iterateN  _ 0 = id
-iterateN  f 1 = f
-iterateN  f n = f . iterateN f (n-1) 
 
 type Interval = Int
 
@@ -142,6 +135,7 @@ applyTransform Relative = relative
 applyTransform Slide = slide
 applyTransform Nebenverwandt = nebenverwandt
 applyTransform Hexapole = hexapole
+
 
 -- Apply a list of transforms to a triad, returning a list of triads
 -- including the original triad and each transformed version
