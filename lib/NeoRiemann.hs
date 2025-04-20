@@ -27,8 +27,10 @@ data Mood = Major | Minor
     deriving (Show, Eq)
 
 data Triad = Triad { root :: Note, third :: Note, fifth :: Note, breadcrumbs :: [Transform] }
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
 
+instance Show Triad where
+    show (Triad r t f crumbs) = "Triad: " ++ show r ++ " " ++ show t ++ " " ++ show f 
 
 instance Show NoteClass where
     show :: NoteClass -> String
@@ -111,6 +113,14 @@ parallel triad@(Triad r t f crumbs) = let mood = findMood triad
                                            Major -> Triad r (lower 1 t) f $ removeDupes (Parallel : crumbs)
                                            Minor -> Triad r (raise 1 t) f $ removeDupes (Parallel : crumbs)
 
+-- leaves no breadcrumbs
+parallel' :: Triad -> Triad
+parallel' triad@(Triad r t f crumbs) = let mood = findMood triad
+                                       in case mood of
+                                           Major -> Triad r (lower 1 t) f crumbs
+                                           Minor -> Triad r (raise 1 t) f crumbs
+
+
 -- The R transformation exchanges a triad for its Relative. 
 -- In a Major Triad move the fifth up a tone (C major to A minor), 
 -- in a Minor Triad move the root down a tone (A minor to C major)
@@ -119,6 +129,14 @@ relative triad@(Triad r t f crumbs) = let mood = findMood triad
                                        in case mood of
                                            Major -> Triad (raise 2 f) r t $ removeDupes (Relative : crumbs)
                                            Minor -> Triad t f (lower 2 r) $ removeDupes (Relative : crumbs)
+
+
+relative' :: Triad -> Triad
+relative' triad@(Triad r t f crumbs) = let mood = findMood triad
+                                       in case mood of
+                                           Major -> Triad (raise 2 f) r t crumbs
+                                           Minor -> Triad t f (lower 2 r) crumbs
+
 
 -- The L transformation exchanges a triad for its Leading-Tone Exchange. 
 -- In a Major Triad the root moves down by a semitone (C major to E minor), 
@@ -130,14 +148,30 @@ leading triad@(Triad r t f crumbs) = let mood = findMood triad
                                          Minor -> Triad (raise 1 f) r t $ removeDupes (Leading : crumbs)
 
 
+-- doesn't leave breadcrumbs
+leading' :: Triad -> Triad
+leading' triad@(Triad r t f crumbs) = let mood = findMood triad
+                                     in case mood of
+                                         Major -> Triad t f (lower 1 r) crumbs
+                                         Minor -> Triad (raise 1 f) r t crumbs
+
+
 slide :: Triad -> Triad
-slide =  leading >>> parallel >>> relative 
+slide triad@(Triad _ _ _ crumbs) = let tfm = leading >>> parallel >>> relative
+                                       moved = tfm triad
+                                    in moved { breadcrumbs = removeDupes  crumbs }
+
+
 
 nebenverwandt :: Triad -> Triad
-nebenverwandt  = relative >>> parallel >>> leading
+nebenverwandt triad@(Triad _ _ _ crumbs) = let tfm = relative >>> leading >>> parallel
+                                               moved = tfm triad
+                                            in moved { breadcrumbs = removeDupes crumbs }
 
 hexapole :: Triad -> Triad
-hexapole  = leading >>> parallel >>> leading
+hexapole triad@(Triad _ _ _ crumbs)  = let tfm = leading >>> parallel >>> leading
+                                           moved = tfm triad
+                                        in moved { breadcrumbs = removeDupes  crumbs }
 
 -- Apply a single transform to a triad
 applyTransform :: Transform -> Triad -> Triad

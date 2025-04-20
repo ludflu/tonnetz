@@ -6,8 +6,8 @@ run:
 	cabal run tonnetz -- \
 		--key C \
 		--mood major \
-		--transform L,P,R
-#		-r 5
+		--transform L,P,R \
+		-r 3
 
 
 test:
