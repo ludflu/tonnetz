@@ -16,7 +16,7 @@ import TonnetzCommands
     ( CommandArgs(..), opts )
 import Options.Applicative (execParser)
 import Diagrams.Backend.SVG (renderSVG)
-
+import qualified Data.Map as M 
 -- computeProgressions :: IO ()
 -- computeProgressions =
 --   do
@@ -37,9 +37,11 @@ run args = do
   print args
   let startingTriad = makeTriad (startingKey args) (startingMood args)
       triads = applyTransforms startingTriad (transformations args)
+      triadNames =  map show triads
+      numberedTriads = M.fromList  $ zip triadNames [1..] 
       -- Print each triad along with its mood
       -- Still render the tonnetz based on the starting triad
-      tonnetz = drawTonnetez startingTriad (contextSize args)
+      tonnetz = drawTonnetez startingTriad (contextSize args) numberedTriads
    in do mapM_ (\t -> putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)) triads
          renderSVG "tonnetz.svg" (mkWidth 500) tonnetz
 

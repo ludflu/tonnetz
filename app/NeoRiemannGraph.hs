@@ -5,7 +5,7 @@ module NeoRiemannGraph where
 import NeoRiemann
 import Diagrams.Backend.SVG.CmdLine (B)
 import Diagrams.Prelude
-
+import qualified Data.Map as M
 
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
@@ -57,11 +57,16 @@ drawMajorTriad triad = let (root, third, fifth) = triad
                             <> rootNode #  translate  fdownLeft
                         in (nodes # center <> triangle' )  # withEnvelope  triangle'
 
-drawTriad :: Triad -> Diagram B
-drawTriad triad = let mood = findMood triad
-                       in case mood of
-                           Major -> drawMajorTriad triad # named (show triad)
-                           Minor -> drawMinorTriad triad # named (show triad)
+labeled :: Diagram B -> Maybe Int -> Diagram B
+labeled d Nothing = d
+labeled d (Just s) = d # opacity 0.5 <> text ("path: " ++ show s) # fontSize (local 0.1) # fc green # center --black # translate (r2 (0, -0.5)) # center
+
+drawTriad ::  M.Map String Int -> Triad -> Diagram B
+drawTriad label triad = let mood = findMood triad
+                            nbr = M.lookup (show triad) label
+                         in case mood of
+                             Major -> labeled (drawMajorTriad triad) nbr
+                             Minor -> labeled (drawMinorTriad triad) nbr
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of
@@ -83,22 +88,22 @@ moveDown t = case findMood t of
   Major -> slide t
   Minor -> parallel t
 
-makeTriadColumn :: [Triad] -> Diagram B
-makeTriadColumn ts = let triads = map drawTriad ts
-                      in foldl1 (===) triads
+makeTriadColumn :: M.Map String Int -> [Triad] ->  Diagram B
+makeTriadColumn labels ts = let triads = map (drawTriad labels) ts
+                             in foldl1 (===) triads
 
 ctf :: [Triad] -> [Triad -> Triad] -> [[Triad]]
 ctf ts = map (`map` ts)
 
-drawTonnetez :: Triad -> Int -> Diagram B
-drawTonnetez t contextSize = let ups :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveUp) (reverse [1..contextSize])
-                                 downs :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveDown)  [1..contextSize]                  
-                                -- this is the middle column
-                                 seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs)
-                                 lefts :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveLeft) (reverse [1..contextSize])
-                                 rights :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveRight) [1..contextSize]
-                                 columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
-                                 tonnetz = ctf seed columnTransforms
-                                 tcols ::[Diagram B] =  map makeTriadColumn tonnetz
-                                 combineSnug l r = l # snugR <> r # snugL
-                              in foldl1 combineSnug tcols
+drawTonnetez :: Triad -> Int -> M.Map String Int -> Diagram B
+drawTonnetez t contextSize labels = let ups :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveUp) (reverse [1..contextSize])
+                                        downs :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveDown)  [1..contextSize]                  
+                                        -- this is the middle column
+                                        seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs)
+                                        lefts :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveLeft) (reverse [1..contextSize])
+                                        rights :: [Triad -> Triad] = map (NeoRiemann.iterateN  moveRight) [1..contextSize]
+                                        columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
+                                        tonnetz = ctf seed columnTransforms
+                                        tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
+                                        combineSnug l r = l # snugR <> r # snugL
+                                      in foldl1 combineSnug tcols
