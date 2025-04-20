@@ -7,6 +7,7 @@ import NeoRiemannGraph
 import Diagrams.Prelude
 import TonnetzCommands
 import Options.Applicative (execParser)
+import Diagrams.Backend.SVG (renderSVG)
 
 -- computeProgressions :: IO ()
 -- computeProgressions =
@@ -27,23 +28,10 @@ run :: CommandArgs -> IO ()
 run args = do
   print args
   let startingTriad = makeTriad (startingKey args) (startingMood args)
-  mainWith $ drawTriad startingTriad
-
+      tonnetz = drawTonnetez startingTriad
+   in renderSVG "tonnetz.svg" (mkWidth 500) tonnetz
 
 main :: IO ()
 main = do
   args <- execParser opts
   run args
-
--- c4 :: Note
--- c4 = Note C 4                             
-
--- cmajor :: Triad
--- cmajor = makeMajorTriad c4
-
--- aminor :: Triad
--- aminor = makeMinorTriad (Note A 4)
-
--- main :: IO ()
--- -- main = mainWith $ drawTriad cmajor
--- main = mainWith $ drawTonnetez cmajor 
