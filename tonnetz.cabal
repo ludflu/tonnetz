@@ -88,6 +88,7 @@ executable tonnetz
         , text
         , hashable
         , optparse-applicative
+        , Euterpea
 
     -- Directories containing source files.
     hs-source-dirs:   app, lib
