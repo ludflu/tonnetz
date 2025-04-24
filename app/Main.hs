@@ -9,7 +9,7 @@ import TonnetzCommands
 import Options.Applicative (execParser)
 import Diagrams.Backend.SVG (renderSVG)
 import qualified Data.Map as M
-import System.Random (initStdGen)
+import System.Random
 import FisherYates
 import Control.Monad (unless)
 
@@ -26,7 +26,7 @@ allTransformations = [Leading, Parallel, Relative, Nebenverwandt, Slide, Hexapol
 
 run :: CommandArgs -> IO ()
 run args = do
-  gen <- initStdGen
+  gen <- getStdGen
   print args
   let startingTriad = makeTriad (startingKey args) (startingMood args)
       (randomTransforms, _) = fisherYates gen allTransformations
