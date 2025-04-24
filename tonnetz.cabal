@@ -73,6 +73,7 @@ executable tonnetz
                  , FisherYates
                  , NeoRiemann
                  , NeoRiemannGraph
+                 , NotesToEuterpea
                  
     build-depends:    base ^>=4.17.2.1
         , modular-arithmetic
