@@ -1,43 +1,49 @@
 module NotesToEuterpea where
 
-import qualified Euterpea as E
-import NeoRiemann (Note(..), NoteClass(..), Triad(..), Transform(..), applyTransforms)
+import Euterpea 
+import qualified NeoRiemann (Note(..), NoteClass(..), Triad(..)) 
 
 -- | Convert a NeoRiemann Note to Euterpea's Pitch
-noteToEuterpea :: NeoRiemann.Note -> E.Pitch
-noteToEuterpea (Note nc oct) = 
+noteToEuterpea :: NeoRiemann.Note -> Pitch
+noteToEuterpea ( NeoRiemann.Note nc oct) = 
   let pc = case nc of
-        C  -> E.C
-        Cs -> E.Cs
-        D  -> E.D
-        Ds -> E.Ds
-        E  -> E.E
-        F  -> E.F
-        Fs -> E.Fs
-        G  -> E.G
-        Gs -> E.Gs
-        A  -> E.A
-        As -> E.As
-        B  -> E.B
+        NeoRiemann.C  -> C
+        NeoRiemann.Cs -> Cs
+        NeoRiemann.D  -> D
+        NeoRiemann.Ds -> Ds
+        NeoRiemann.E  -> E
+        NeoRiemann.F  -> F
+        NeoRiemann.Fs -> Fs
+        NeoRiemann.G  -> G
+        NeoRiemann.Gs -> Gs
+        NeoRiemann.A  -> A
+        NeoRiemann.As -> As
+        NeoRiemann.B  -> B
   in (pc,oct)
 
 -- | Convert a NeoRiemann Note to Euterpea's Music Pitch
-neoRiemannToEuterpea :: NeoRiemann.Note -> E.Music E.Pitch
-neoRiemannToEuterpea note = 
+neoRiemannToEuterpea :: NeoRiemann.Note -> Music Pitch
+neoRiemannToEuterpea note' = 
   -- Create a quarter note with the pitch derived from the NeoRiemann Note
-  E.note (1/4) (noteToEuterpea note)
+  note (1/4) (noteToEuterpea note')
 
 -- | Play a NeoRiemann Triad as Euterpea Music Pitch
-playTriad :: NeoRiemann.Triad -> E.Music E.Pitch
-playTriad (Triad root third fifth _) = 
+renderTriad :: NeoRiemann.Triad -> Music Pitch
+renderTriad (NeoRiemann.Triad root third fifth _) = 
   -- Play the three notes as a chord (simultaneously)
-  E.chord [neoRiemannToEuterpea root, 
+  chord [neoRiemannToEuterpea root, 
          neoRiemannToEuterpea third, 
          neoRiemannToEuterpea fifth]
 
 -- -- | Play a sequence of NeoRiemann Triads as Euterpea Music Pitch
--- playTriadSequence :: [NeoRiemann.Triad] -> Euterpea.Music Pitch
--- playTriadSequence = foldr1 (:+:) . map playTriad
+renderTriadSequence :: [NeoRiemann.Triad] -> Music Pitch
+renderTriadSequence = foldr1 (:+:) . map renderTriad
+
+
+playTriads :: [NeoRiemann.Triad] -> IO ()
+playTriads triads = do
+  let music = renderTriadSequence triads
+   in play $ rest (1/4) :+: music :+: rest (1/4)
 
 -- | Example of creating a simple Music Pitch value
 -- Example: c 4 qn = quarter note middle C

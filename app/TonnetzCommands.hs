@@ -11,7 +11,11 @@ data CommandArgs = CommandArgs
      startingMood :: Mood,
    transformations :: [Transform],
    contextSize :: Int,
-   randomize :: Maybe Int
+   randomize :: Maybe Int,
+   play :: Bool,
+   _help:: Bool,
+   version :: Bool,
+   verbose :: Bool
   } deriving (Show)
 
 parseMood :: ReadM Mood
@@ -102,6 +106,20 @@ commandArgs = CommandArgs
       <> short 'r'
       <> metavar "RANDOMIZE"
       <> help "Randomize the transformations (default: None)"))
+  <*> switch
+      ( long "play"
+      <> short 'p'    
+      <> help "Play the generated transformations using Euterpea (default: False)")
+  <*> switch
+      ( long "help"
+      <> short 'h'
+      <> help "Show this help message")
+  <*> switch
+      ( long "version"
+      <> short 'v'
+      <> help "Show version information")
+  <*> switch
+      ( long "verbose"  )
 
 opts :: ParserInfo CommandArgs
 opts = info (commandArgs <**> helper)

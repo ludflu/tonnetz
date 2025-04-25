@@ -12,6 +12,7 @@ import qualified Data.Map as M
 import System.Random
 import FisherYates
 import Control.Monad (unless)
+import NotesToEuterpea (playTriads)
 
 makeTriad :: NoteClass -> Mood -> Triad
 makeTriad nc m = case m of
@@ -38,6 +39,7 @@ run args = do
       numberedTriads = M.fromList  $ zip triadNames [1..]
       tonnetz = drawTonnetez startingTriad (contextSize args) numberedTriads
    in do print tfs
+         playTriads triads
          mapM_ (\t -> do
                    putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)
                    let Triad _ _ _ crumbs = t
