@@ -11,7 +11,7 @@ import Diagrams.Backend.SVG (renderSVG)
 import qualified Data.Map as M
 import System.Random
 import FisherYates
-import Control.Monad (unless)
+import Control.Monad (unless, when)
 import NotesToEuterpea (playTriads)
 import Data.Maybe (fromMaybe)
 
@@ -22,11 +22,9 @@ makeTriad nc m = case m of
 
 
 
-
 run :: CommandArgs -> IO ()
 run args = do
   gen <- getStdGen
-  print args
   let startingTriad = makeTriad (startingKey args) (startingMood args)
       (randomTransforms, _) = fisherYates gen allTransformations
       transforms = fromMaybe allTransformations (transformations args)
@@ -37,8 +35,9 @@ run args = do
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
       tonnetz = drawTonnetez startingTriad (contextSize args) numberedTriads
-   in do print tfs
-         playTriads triads
+   in do when (verbose args) (print args )
+         when (verbose args) (print tfs )
+         playTriads triads (duration args)
          mapM_ (\t -> do
                    putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)
                    let Triad _ _ _ crumbs = t

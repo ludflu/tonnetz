@@ -11,6 +11,7 @@ data CommandArgs = CommandArgs
      startingMood :: Mood,
    transformations :: Maybe [Transform],
    contextSize :: Int,
+   duration :: Integer,
    randomize :: Maybe Int,
    play :: Bool,
    _help:: Bool,
@@ -99,8 +100,14 @@ commandArgs = CommandArgs
       ( long "context"
       <> short 'c'
       <> metavar "CONTEXT"
-      <> value 5
+      <> value 4
       <> help "Context size for the transformations (default: 4)")
+  <*> option auto
+      ( long "duration"
+      <> short 'd'
+      <> metavar "DURATION"
+      <> value 4
+      <> help "Duration of each note in the transformations (defaults to quarter note: 4)")
   <*> optional (option auto
       ( long "randomize"
       <> short 'r'

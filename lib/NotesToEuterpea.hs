@@ -28,38 +28,24 @@ sound note' dur' =
   note dur' (noteToEuterpea note')
 
 -- | Play a NeoRiemann Triad as Euterpea Music Pitch
-renderTriad :: NeoRiemann.Triad -> Music Pitch
-renderTriad (NeoRiemann.Triad root third fifth _) = 
+renderTriad :: Dur -> NeoRiemann.Triad -> Music Pitch
+renderTriad dur' (NeoRiemann.Triad root third fifth _) = 
   -- Play the three notes as a chord (simultaneously)
-  let chord' = chord  [sound root 1, 
-         sound  third 1, 
-         sound fifth 1 ]
-      arp = foldr1 (:+:) [sound root (1/4), 
-         sound third (1/4), 
-         sound fifth (1/4)]
---    in chord' :=: arp :+: rest (1/4) -- Add a rest after the chord
-    in chord'  :+: rest (1/4) -- Add a rest after the chord
+  let chord' = chord  [sound root dur', 
+         sound  third dur', 
+         sound fifth dur' ]
+    in chord'  :+: rest (1/4)
 
 
-renderTriadSequence :: [NeoRiemann.Triad] -> Music Pitch
-renderTriadSequence triads = 
+renderTriadSequence :: Dur -> [NeoRiemann.Triad] -> Music Pitch
+renderTriadSequence dur' triads = 
   -- Create a sequence of triads
-  let music = foldr1 (:+:) $ map renderTriad triads
+  let music = foldr1 (:+:) $ map (renderTriad dur') triads
   in music
 
-playTriads :: [NeoRiemann.Triad] -> IO ()
-playTriads triads = do
-  let music = renderTriadSequence triads
-   in play $ rest (1/4) :+: music :+: rest (1/4)
+playTriads :: [NeoRiemann.Triad] -> Integer -> IO ()
+playTriads triads dur' = do
+  let duration' = 1 / fromIntegral dur' :: Dur
+      music = renderTriadSequence duration' triads 
+   in play $ rest duration' :+: music :+: rest duration'
 
--- | Example of creating a simple Music Pitch value
--- Example: c 4 qn = quarter note middle C
--- C major chord example:
--- cMajorChord :: Music Pitch
--- cMajorChord = chord [c 4 qn, e 4 qn, g 4 qn]
---   where
---     -- Helper functions for creating note values
---     c o d = note d (Pitch C o)    -- C note of octave o, duration d
---     e o d = note d (Pitch E o)    -- E note of octave o, duration d
---     g o d = note d (Pitch G o)    -- G note of octave o, duration d
---     qn = 1/4                      -- Quarter note duration
