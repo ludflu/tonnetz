@@ -13,15 +13,13 @@ import System.Random
 import FisherYates
 import Control.Monad (unless)
 import NotesToEuterpea (playTriads)
+import Data.Maybe (fromMaybe)
 
 makeTriad :: NoteClass -> Mood -> Triad
 makeTriad nc m = case m of
   Major -> makeMajorTriad (Note nc 4)
   Minor -> makeMinorTriad (Note nc 4)
 
-
-allTransformations :: [Transform]
-allTransformations = [Leading, Parallel, Relative, Nebenverwandt, Slide, Hexapole]
 
 
 
@@ -31,9 +29,10 @@ run args = do
   print args
   let startingTriad = makeTriad (startingKey args) (startingMood args)
       (randomTransforms, _) = fisherYates gen allTransformations
+      transforms = fromMaybe allTransformations (transformations args)
       tfs = case randomize args of 
         Just r -> take r randomTransforms
-        Nothing -> transformations args
+        Nothing -> transforms
       triads = applyTransforms startingTriad tfs
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
