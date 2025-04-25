@@ -2,6 +2,7 @@ module NotesToEuterpea where
 
 import Euterpea 
 import qualified NeoRiemann (Note(..), NoteClass(..), Triad(..)) 
+import Diagrams (Renderable(render))
 
 -- | Convert a NeoRiemann Note to Euterpea's Pitch
 noteToEuterpea :: NeoRiemann.Note -> Pitch
@@ -22,23 +23,28 @@ noteToEuterpea ( NeoRiemann.Note nc oct) =
   in (pc,oct)
 
 -- | Convert a NeoRiemann Note to Euterpea's Music Pitch
-neoRiemannToEuterpea :: NeoRiemann.Note -> Music Pitch
-neoRiemannToEuterpea note' = 
-  -- Create a quarter note with the pitch derived from the NeoRiemann Note
-  note (1/4) (noteToEuterpea note')
+sound :: NeoRiemann.Note -> Dur -> Music Pitch
+sound note' dur' = 
+  note dur' (noteToEuterpea note')
 
 -- | Play a NeoRiemann Triad as Euterpea Music Pitch
 renderTriad :: NeoRiemann.Triad -> Music Pitch
 renderTriad (NeoRiemann.Triad root third fifth _) = 
   -- Play the three notes as a chord (simultaneously)
-  chord [neoRiemannToEuterpea root, 
-         neoRiemannToEuterpea third, 
-         neoRiemannToEuterpea fifth]
+  let chord' = chord  [sound root 1, 
+         sound  third 1, 
+         sound fifth 1 ]
+      arp = foldr1 (:+:) [sound root (1/4), 
+         sound third (1/4), 
+         sound fifth (1/4)]
+    in chord' :=: arp :+: rest (1/4) -- Add a rest after the chord
 
--- -- | Play a sequence of NeoRiemann Triads as Euterpea Music Pitch
+
 renderTriadSequence :: [NeoRiemann.Triad] -> Music Pitch
-renderTriadSequence = foldr1 (:+:) . map renderTriad
-
+renderTriadSequence triads = 
+  -- Create a sequence of triads
+  let music = foldr1 (:+:) $ map renderTriad triads
+  in music
 
 playTriads :: [NeoRiemann.Triad] -> IO ()
 playTriads triads = do
