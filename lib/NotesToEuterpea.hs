@@ -37,7 +37,8 @@ renderTriad (NeoRiemann.Triad root third fifth _) =
       arp = foldr1 (:+:) [sound root (1/4), 
          sound third (1/4), 
          sound fifth (1/4)]
-    in chord' :=: arp :+: rest (1/4) -- Add a rest after the chord
+--    in chord' :=: arp :+: rest (1/4) -- Add a rest after the chord
+    in chord'  :+: rest (1/4) -- Add a rest after the chord
 
 
 renderTriadSequence :: [NeoRiemann.Triad] -> Music Pitch
