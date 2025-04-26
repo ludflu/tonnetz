@@ -39,9 +39,9 @@ convertPointToVector p = let (x, y) = unp2 p
 transformToVector :: (Floating f) => Transform -> V2 f
 transformToVector t = case t of
   NeoRiemann.Identity ->  V2 0.0 0.0
-  Leading -> unitX
+  Leading -> -unitX
   Parallel -> unitY
-  Relative -> -unitX
+  Relative -> unitX
   Slide ->  transformToVector Leading  + transformToVector Parallel + transformToVector Relative
   Nebenverwandt -> transformToVector Relative + transformToVector Parallel + transformToVector Leading  
   Hexapole -> transformToVector Leading  + transformToVector Parallel + transformToVector Leading  
@@ -50,8 +50,8 @@ findVector :: (RealFloat f) =>  Triad -> Transform -> V2 f
 findVector triad trans = let mood = findMood triad
                              vec = transformToVector trans
                           in case mood of 
-                            Major -> -vec
-                            Minor -> vec
+                            Major -> vec
+                            Minor -> -vec
 
 mapVectors :: (RealFloat f) => [(Triad, Transform)] -> [V2 f]
 mapVectors  = map (uncurry findVector) 
@@ -163,7 +163,7 @@ addVect a b = a + b
 
 -- call stack too large
 makeTheArrows :: [V2 Double] -> Diagram B
-makeTheArrows vecs = let vecsums = makeVects vecs
+makeTheArrows vecs = let vecsums =  V2 0.0 0.0 : vecs
                          pairs = windows 2 vecsums
                          linez :: [(P2 Double,V2 Double )] = map (\ls ->  (convertVectorToPoint (head ls) , ls !! 1)) pairs
                          arrowz  =  map (uncurry arrowAt) linez
