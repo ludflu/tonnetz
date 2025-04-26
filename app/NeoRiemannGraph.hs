@@ -40,8 +40,8 @@ transformToVector :: (Floating f) => Transform -> V2 f
 transformToVector t = case t of
   NeoRiemann.Identity ->  V2 0.0 0.0
   Leading -> -unitX
-  Parallel -> unitY
-  Relative -> unitX
+  Parallel -> unitY 
+  Relative -> unitX 
   Slide ->  transformToVector Leading  + transformToVector Parallel + transformToVector Relative
   Nebenverwandt -> transformToVector Relative + transformToVector Parallel + transformToVector Leading  
   Hexapole -> transformToVector Leading  + transformToVector Parallel + transformToVector Leading  
@@ -60,32 +60,30 @@ closeShape :: [V2 Double] ->  Diagram B
 closeShape pts = let closedPts = map convertVectorToPoint pts
                   in strokeLoop (fromVertices closedPts)
 
+closeShape' :: Located (Trail V2 Double)  ->  Diagram B
+closeShape' trail = let pts = getPoints trail
+                        closedPts = map convertVectorToPoint pts
+                     in strokeLoop (fromVertices closedPts)
 
-drawMinorTriad :: Triad -> Diagram B
-drawMinorTriad triad = let Triad r t f _ = triad
-                           t1 = triangle 1 
-                           (up,downLeft,downRight) = triangleVector t1
-                           rootNode = drawNote r
-                           thirdNode = drawNote t
-                           fifthNode = drawNote f
-                           triangle' = closeShape [up, downLeft, downRight, up]  # center
-                           nodes = thirdNode # translate up
-                            <> fifthNode # translate downRight
-                            <> rootNode # translate downLeft
-                        in (nodes # center <> (t1  # fillColor blue # center # showOrigin)) # withEnvelope triangle'
+drawTriad' :: Triad -> Diagram B
+drawTriad' triad = let Triad r t f _ = triad
+                       mood = findMood triad
+                       tcolor = case mood of 
+                              Minor ->  blue
+                              Major ->  red
+                       t1 = case mood of 
+                              Minor -> triangle 1 -- # fillColor blue
+                              Major -> triangle 1 # reflectY -- # fillColor red
+                       (up,downLeft,downRight) = triangleVector t1
+                       rootNode = drawNote r
+                       thirdNode = drawNote t
+                       fifthNode = drawNote f
+                       triangle' = closeShape (getPoints t1)  # center
+                       nodes = thirdNode # translate up
+                         <> fifthNode # translate  downRight
+                         <> rootNode #  translate  downLeft
+                   in (nodes # center <> t1 # fillColor tcolor # center # showOrigin)  # withEnvelope triangle'
 
-drawMajorTriad :: Triad -> Diagram B
-drawMajorTriad triad = let Triad r t f _ = triad
-                           t1 = triangle 1 # reflectY
-                           (up,downLeft,downRight) = triangleVector t1
-                           rootNode = drawNote r
-                           thirdNode = drawNote t
-                           fifthNode = drawNote f
-                           triangle' = closeShape [up, downLeft, downRight, up]  # center
-                           nodes = thirdNode # translate up
-                            <> fifthNode # translate  downRight
-                            <> rootNode #  translate  downLeft
-                        in (nodes # center <> t1 # fillColor red # center # showOrigin)  # withEnvelope triangle'
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
 labeled d Nothing = d
@@ -99,9 +97,10 @@ drawTriad label triad = let mood = findMood triad
                                            then "No transformations"
                                            else "Transformations: " ++ show (reverse crumbs)
                             withName = if null crumbs then "origin" else ""
-                            diag = case mood of
-                                     Major -> drawMajorTriad triad
-                                     Minor -> drawMinorTriad triad
+                            diag = drawTriad' triad
+                            -- diag = case mood of
+                            --          Major -> drawMajorTriad triad
+                            --          Minor -> drawMinorTriad triad
                          in labeled (diag # svgTitle breadcrumbStr # named withName ) nbr
 
 moveRight :: Triad -> Triad
