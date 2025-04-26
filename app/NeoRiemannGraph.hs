@@ -14,10 +14,6 @@ drawNote n = let noteTxt = show $ noteClass n
                  node = (text noteTxt # fc black # scale 0.75) # center <> circle 0.75 # fc white # center
               in node # scale 0.25
 
-triangleVector :: (Floating b1, Floating b2, Floating b3, Ord b1, Ord b2, Ord b3) => (V2 b1, V2 b2, V2 b3)
-triangleVector = let pts = map unp2 $ trailVertices $ triangle 1  
-                     ppts = map (uncurry V2) pts               
-                  in (head ppts, ppts !! 1 , ppts !! 2)
 
 convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
@@ -47,10 +43,17 @@ closeShape ::  [V2 Double] ->  Diagram B
 closeShape pts = let closedPts = map convertVectorToPoint pts
                   in strokeLoop (fromVertices closedPts) 
 
+-- triangleVector :: (Floating b1, Floating b2, Floating b3, Ord b1, Ord b2, Ord b3) => (V2 b1, V2 b2, V2 b3)
+triangleVector :: (Floating n, Ord n) => Located (Trail V2 n) -> (V2 n, V2 n, V2 n)
+triangleVector t = let pts = map unp2 $ trailVertices t
+                       ppts = map (uncurry V2) pts               
+                    in (head ppts, ppts !! 1 , ppts !! 2)
+
 
 drawMinorTriad :: Triad -> Diagram B
 drawMinorTriad triad = let Triad r t f _ = triad
-                           (up,downLeft,downRight) = triangleVector
+                           t1 = triangle 1
+                           (up,downLeft,downRight) = triangleVector t1
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
@@ -62,15 +65,15 @@ drawMinorTriad triad = let Triad r t f _ = triad
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let Triad r t f _ = triad
-                           (up,downLeft,downRight) = triangleVector
-                           (fup,fdownLeft,fdownRight) = (up # reflectY ,downLeft # reflectY ,downRight# reflectY )
+                           t1 = triangle 1 # reflectY
+                           (up,downLeft,downRight) = triangleVector t1
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
-                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup]  # center
-                           nodes = thirdNode # translate  fup
-                            <> fifthNode # translate  fdownRight
-                            <> rootNode #  translate  fdownLeft
+                           triangle' = closeShape [up, downLeft, downRight, up]  # center
+                           nodes = thirdNode # translate  up
+                            <> fifthNode # translate  downRight
+                            <> rootNode #  translate  downLeft
                         in (nodes # center <> triangle' #fillColor red # center )  # withEnvelope  triangle'
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
