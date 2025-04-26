@@ -8,7 +8,8 @@ import Diagrams.Backend.SVG (svgTitle)
 import Diagrams.Prelude
 import qualified Data.Map as M
 import Data.Maybe
-
+import Data.IntMap (mapAccum)
+import Data.List
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
                  node = (text noteTxt # fc black # scale 0.75) # center <> circle 0.75 # fc white # center
@@ -27,6 +28,10 @@ convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
                           in p2 (x,y)
 
+convertPointToVector :: (RealFloat f) =>  P2 f -> V2 f 
+convertPointToVector p = let (x, y) = unp2 p
+              in V2 x y
+
 transformToVector :: (Floating f) => Transform -> V2 f
 transformToVector t = case t of
   NeoRiemann.Identity ->  V2 0.0 0.0
@@ -37,14 +42,14 @@ transformToVector t = case t of
   Nebenverwandt -> transformToVector Relative + transformToVector Parallel + transformToVector Leading  
   Hexapole -> transformToVector Leading  + transformToVector Parallel + transformToVector Leading  
 
-findVector :: Triad -> Transform -> V2 Double
+findVector :: (RealFloat f) =>  Triad -> Transform -> V2 f
 findVector triad trans = let mood = findMood triad
                              vec = transformToVector trans
                           in case mood of 
                             Major -> -vec
                             Minor -> vec
 
-mapVectors :: [(Triad, Transform)] -> [V2 Double]
+mapVectors :: (RealFloat f) => [(Triad, Transform)] -> [V2 f]
 mapVectors  = map (uncurry findVector) 
 
 closeShape :: [V2 Double] ->  Diagram B
@@ -130,14 +135,21 @@ composeN  _ 0 = id
 composeN  f 1 = f
 composeN  f n = f . composeN f (n-1) 
 
--- drawArrow
+
+--makeVects :: [Int] -> [Int]
+makeVects vs = let indx = [0..length vs]
+                   takes = flip take vs
+                   groups = map takes indx
+                in map sum groups
+
+windows' :: Int -> [a] -> [[a]]
+windows' n = map (take n) . tails
 
 --draws a tonnez with the passed in triad as the center / origin
 drawTonnetez :: Triad -> [(Triad, Transform)] -> Int -> M.Map String Int -> Diagram B
 drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (composeN  moveUp) (reverse [1..contextSize])
                                            downs :: [Triad -> Triad] = map (composeN  moveDown)  [1..contextSize]                                                          
                                            seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs) -- this is the middle column
-
                                            lefts :: [Triad -> Triad] = map (composeN  moveLeft) (reverse [1..contextSize])
                                            rights :: [Triad -> Triad] = map (composeN  moveRight) [1..contextSize]
                                            columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
@@ -145,9 +157,17 @@ drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (compos
                                            tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
                                            combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
                                            tonnetzDiagram = foldl1 combineSnug tcols
-                                           originTriad = lookupName "origin" tonnetzDiagram
-                                           originLocation = fmap location originTriad
-                                           triadOrigin = fromMaybe (p2 (0,0)) originLocation
+
+                                          --  originTriadDiagram = lookupName "origin" tonnetzDiagram
+                                          --  originLocation = fmap location originTriadDiagram
+                                          --  triadOrigin = fromMaybe (p2 (0,0)) originLocation
+
                                            vecs = mapVectors tt
-                                           originArrow = arrowAt triadOrigin (head vecs)
-                                       in originArrow <> tonnetzDiagram
+                                           vecsums = makeVects vecs
+                                           pairs = windows' 2 vecsums
+                                           points = map (\ls ->  p2 (head ls , ls !! 1)) pairs
+                                           pointPairs' = windows' 2 points
+                                           pointPairs'' = map (\ls ->  (head ls , convertPointToVector (ls !! 1))) pointPairs'
+                                           arrowz  = map (uncurry arrowAt) pointPairs''
+                                           arrowDiag = foldl1 (<>) arrowz
+                                       in  tonnetzDiagram <> arrowDiag
