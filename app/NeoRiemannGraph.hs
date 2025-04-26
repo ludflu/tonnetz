@@ -4,9 +4,10 @@ module NeoRiemannGraph where
 
 import NeoRiemann
 import Diagrams.Backend.SVG.CmdLine (B)
-import Diagrams.Backend.SVG (renderSVG, svgTitle)
+import Diagrams.Backend.SVG (svgTitle)
 import Diagrams.Prelude
 import qualified Data.Map as M
+import Data.Maybe
 
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
@@ -15,24 +16,21 @@ drawNote n = let noteTxt = show $ noteClass n
 
 
 triangleVector :: (Floating f) => (V2 f, V2 f, V2 f)
-triangleVector = let up = r2 (0,0.5)
+triangleVector = let up = unitY
                      downLeft = up # rotateBy (1/3)
                      downRight = up # rotateBy ((-1)/3)
                   in (up, downLeft, downRight)
-
 
 convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
                           in p2 (x,y)
 
--- unitY :: (Floating f) => V2 f
--- unitY = r2 (0,1.0)
-
 transformToVector :: (Floating f) => Transform -> V2 f
 transformToVector t = case t of
-  Leading -> unitY # rotateBy (1/3)
+  NeoRiemann.Identity ->  V2 0.0 0.0
+  Leading -> unitX
   Parallel -> unitY
-  Relative -> unitY # rotateBy ((-1)/3)
+  Relative -> -unitX
   Slide ->  transformToVector Leading  + transformToVector Parallel + transformToVector Relative
   Nebenverwandt -> transformToVector Relative + transformToVector Parallel + transformToVector Leading  
   Hexapole -> transformToVector Leading  + transformToVector Parallel + transformToVector Leading  
@@ -43,6 +41,9 @@ findVector triad trans = let mood = findMood triad
                           in case mood of 
                             Major -> vec
                             Minor -> -vec
+
+mapVectors :: [(Triad, Transform)] -> [V2 Double]
+mapVectors  = map (uncurry findVector) 
 
 closeShape :: (Color a) => [V2 Double] ->  a -> Diagram B
 closeShape pts c = let closedPts = map convertVectorToPoint pts
@@ -59,7 +60,7 @@ drawMinorTriad triad = let Triad r t f _ = triad
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
-                        in (nodes # center <> triangle' ) # withEnvelope triangle'
+                        in (nodes # center <> (triangle' # showOrigin)) # withEnvelope triangle'
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let Triad r t f _ = triad
@@ -86,10 +87,11 @@ drawTriad label triad = let mood = findMood triad
                             breadcrumbStr = if null crumbs
                                            then "No transformations"
                                            else "Transformations: " ++ show (reverse crumbs)
+                            withName = if null crumbs then "origin" else ""
                             diag = case mood of
                                      Major -> drawMajorTriad triad
                                      Minor -> drawMinorTriad triad
-                         in labeled (diag # svgTitle breadcrumbStr) nbr
+                         in labeled (diag # svgTitle breadcrumbStr # named withName ) nbr
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of
@@ -126,14 +128,23 @@ composeN  _ 0 = id
 composeN  f 1 = f
 composeN  f n = f . composeN f (n-1) 
 
-drawTonnetez :: Triad -> Int -> M.Map String Int -> Diagram B
-drawTonnetez t contextSize labels = let ups :: [Triad -> Triad] = map (composeN  moveUp) (reverse [1..contextSize])
-                                        downs :: [Triad -> Triad] = map (composeN  moveDown)  [1..contextSize]                                                          
-                                        seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs) -- this is the middle column
-                                        lefts :: [Triad -> Triad] = map (composeN  moveLeft) (reverse [1..contextSize])
-                                        rights :: [Triad -> Triad] = map (composeN  moveRight) [1..contextSize]
-                                        columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
-                                        tonnetz = ctf seed columnTransforms
-                                        tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
-                                        combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
-                                      in foldl1 combineSnug tcols
+-- drawArrow
+
+--draws a tonnez with the passed in triad as the center / origin
+drawTonnetez :: Triad -> [(Triad, Transform)] -> Int -> M.Map String Int -> Diagram B
+drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (composeN  moveUp) (reverse [1..contextSize])
+                                           downs :: [Triad -> Triad] = map (composeN  moveDown)  [1..contextSize]                                                          
+                                           seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs) -- this is the middle column
+                                           lefts :: [Triad -> Triad] = map (composeN  moveLeft) (reverse [1..contextSize])
+                                           rights :: [Triad -> Triad] = map (composeN  moveRight) [1..contextSize]
+                                           columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
+                                           tonnetz = ctf seed columnTransforms
+                                           tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
+                                           combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
+                                           tonnetzDiagram = foldl1 combineSnug tcols
+                                           originTriad = lookupName "origin" tonnetzDiagram
+                                           originLocation = fmap location originTriad
+                                           triadOrigin = fromMaybe (p2 (0,0)) originLocation
+                                           vecs = mapVectors tt
+                                           originArrow = arrowAt triadOrigin (head vecs)
+                                       in originArrow <> tonnetzDiagram

@@ -26,15 +26,17 @@ run :: CommandArgs -> IO ()
 run args = do
   gen <- getStdGen
   let startingTriad = makeTriad (startingKey args) (startingMood args)
-      (randomTransforms, _) = fisherYates gen allTransformations
       transforms = fromMaybe allTransformations (transformations args)
+      (randomTransforms, _) = fisherYates gen transforms
       tfs = case randomize args of 
         Just r -> take r randomTransforms
         Nothing -> transforms
       triads = applyTransforms startingTriad tfs
+      transformedTriads = zip (startingTriad : triads) tfs    
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
-      tonnetz = drawTonnetez startingTriad (contextSize args) numberedTriads
+
+      tonnetz = drawTonnetez startingTriad transformedTriads (contextSize args) numberedTriads
    in do when (verbose args) (print args )
          when (verbose args) (print tfs )
          playTriads triads (duration args)

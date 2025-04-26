@@ -7,10 +7,10 @@ run:
 		--key C \
 		--verbose \
 		--mood major \
-		--randomize 3 \
-		--transform L,P,R,N \
+		--transform P,R,L \
 		--duration 4
 
+#		--randomize 3 \
 
 test:
 	cabal test

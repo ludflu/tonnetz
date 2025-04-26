@@ -8,7 +8,7 @@ import Control.Arrow ( (>>>) )
 
 type Interval = Int
 
-data Transform = Leading | Parallel | Relative | Slide | Nebenverwandt | Hexapole
+data Transform = Identity | Leading | Parallel | Relative | Slide | Nebenverwandt | Hexapole
   deriving (Show, Eq, Ord)
 
 data NoteClass = C | Cs| D| Ds | E | F | Fs | G | Gs | A | As | B
@@ -138,29 +138,31 @@ leading triad@(Triad r t f crumbs) = let mood = findMood triad
 
 
 slide :: Triad -> Triad
-slide triad@(Triad _ _ _ crumbs) = let tfm = leading >>> parallel >>> relative
-                                       moved = tfm triad
-                                    in moved { breadcrumbs =  crumbs }
+slide triad = let tfm = leading >>> parallel >>> relative
+                  moved = tfm triad
+               in moved { breadcrumbs = removeDupes (breadcrumbs moved) }
 
 
 nebenverwandt :: Triad -> Triad
-nebenverwandt triad@(Triad _ _ _ crumbs) = let tfm = relative >>> leading >>> parallel
-                                               moved = tfm triad
-                                            in moved { breadcrumbs = removeDupes crumbs }
+nebenverwandt triad = let tfm = relative >>> leading >>> parallel
+                          moved = tfm triad
+                       in moved { breadcrumbs = removeDupes (breadcrumbs moved) }
 
 hexapole :: Triad -> Triad
-hexapole triad@(Triad _ _ _ crumbs)  = let tfm = leading >>> parallel >>> leading
-                                           moved = tfm triad
-                                        in moved { breadcrumbs = removeDupes  crumbs }
+hexapole triad = let tfm = leading >>> parallel >>> leading
+                     moved = tfm triad
+                  in moved { breadcrumbs = removeDupes (breadcrumbs moved) }
 
 -- Apply a single transform to a triad
 applyTransform :: Transform -> Triad -> Triad
+applyTransform Identity = id
 applyTransform Leading = leading
 applyTransform Parallel = parallel
 applyTransform Relative = relative
 applyTransform Slide = slide
 applyTransform Nebenverwandt = nebenverwandt
 applyTransform Hexapole = hexapole
+
 
 
 -- Apply a list of transforms to a triad, returning a list of triads
