@@ -14,12 +14,10 @@ drawNote n = let noteTxt = show $ noteClass n
                  node = (text noteTxt # fc black # scale 0.75) # center <> circle 0.75 # fc white # center
               in node # scale 0.25
 
-
-triangleVector :: (Floating f) => (V2 f, V2 f, V2 f)
-triangleVector = let up = unitY
-                     downLeft = up # rotateBy (1/3)
-                     downRight = up # rotateBy ((-1)/3)
-                  in (up, downLeft, downRight)
+triangleVector :: (Floating b1, Floating b2, Floating b3, Ord b1, Ord b2, Ord b3) => (V2 b1, V2 b2, V2 b3)
+triangleVector = let pts = map unp2 $ trailVertices $ triangle 1  
+                     ppts = map (uncurry V2) pts               
+                  in (head ppts, ppts !! 1 , ppts !! 2)
 
 convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
