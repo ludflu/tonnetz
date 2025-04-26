@@ -145,6 +145,18 @@ makeVects vs = let indx = [0..length vs]
 windows' :: Int -> [a] -> [[a]]
 windows' n = map (take n) . tails
 
+
+makeTheArrows :: [(Triad, Transform)] -> Diagram B
+makeTheArrows tt = let vecs = mapVectors tt
+                       vecsums = makeVects vecs
+                       pairs = windows' 2 vecsums
+                       points = map (\ls ->  p2 (head ls , ls !! 1)) pairs
+                       pointPairs' = windows' 2 points
+                       pointPairs'' = map (\ls ->  (head ls , convertPointToVector (ls !! 1))) pointPairs'
+                       arrowz =  map (uncurry arrowAt) pointPairs''
+                    in foldl1 (<>) arrowz 
+
+
 --draws a tonnez with the passed in triad as the center / origin
 drawTonnetez :: Triad -> [(Triad, Transform)] -> Int -> M.Map String Int -> Diagram B
 drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (composeN  moveUp) (reverse [1..contextSize])
@@ -157,17 +169,9 @@ drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (compos
                                            tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
                                            combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
                                            tonnetzDiagram = foldl1 combineSnug tcols
-
+                                           arrowDiagram = makeTheArrows tt
                                           --  originTriadDiagram = lookupName "origin" tonnetzDiagram
                                           --  originLocation = fmap location originTriadDiagram
                                           --  triadOrigin = fromMaybe (p2 (0,0)) originLocation
 
-                                           vecs = mapVectors tt
-                                           vecsums = makeVects vecs
-                                           pairs = windows' 2 vecsums
-                                           points = map (\ls ->  p2 (head ls , ls !! 1)) pairs
-                                           pointPairs' = windows' 2 points
-                                           pointPairs'' = map (\ls ->  (head ls , convertPointToVector (ls !! 1))) pointPairs'
-                                           arrowz  = map (uncurry arrowAt) pointPairs''
-                                           arrowDiag = foldl1 (<>) arrowz
-                                       in  tonnetzDiagram <> arrowDiag
+                                       in  tonnetzDiagram <> arrowDiagram
