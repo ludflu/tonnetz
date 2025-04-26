@@ -15,11 +15,21 @@ drawNote n = let noteTxt = show $ noteClass n
               in node # scale 0.25
 
 
-triangleVector :: (Floating f) => (V2 f, V2 f, V2 f)
-triangleVector = let up = unitY
-                     downLeft = up # rotateBy (1/3)
-                     downRight = up # rotateBy ((-1)/3)
-                  in (up, downLeft, downRight)
+-- triangleVector :: (Floating f) => (V2 f, V2 f, V2 f)
+-- triangleVector = let up = unitY
+--                      downLeft = up # rotateBy (1/3)
+--                      downRight = up # rotateBy ((-1)/3)
+--                   in (up, downLeft, downRight)
+
+
+
+getPoints :: (Floating n, Ord n) => Located (Trail V2 n) -> [V2 n]
+getPoints t = let pts = map unp2 $ trailVertices t
+               in map (uncurry V2) pts               
+
+triangleVector :: (Floating n, Ord n) => Located (Trail V2 n) -> (V2 n, V2 n, V2 n)
+triangleVector t = let pts = getPoints t
+                    in (head pts, pts !! 1 , pts !! 2)
 
 convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
@@ -39,8 +49,8 @@ findVector :: Triad -> Transform -> V2 Double
 findVector triad trans = let mood = findMood triad
                              vec = transformToVector trans
                           in case mood of 
-                            Major -> vec
-                            Minor -> -vec
+                            Major -> -vec
+                            Minor -> vec
 
 mapVectors :: [(Triad, Transform)] -> [V2 Double]
 mapVectors  = map (uncurry findVector) 
@@ -52,7 +62,8 @@ closeShape pts c = let closedPts = map convertVectorToPoint pts
 
 drawMinorTriad :: Triad -> Diagram B
 drawMinorTriad triad = let Triad r t f _ = triad
-                           (up,downLeft,downRight) = triangleVector
+                           t1 = triangle 1 
+                           (up,downLeft,downRight) = triangleVector t1
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
@@ -60,21 +71,20 @@ drawMinorTriad triad = let Triad r t f _ = triad
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
-                        in (nodes # center <> (triangle' # showOrigin)) # withEnvelope triangle'
+                        in (nodes # center <> (t1  # fillColor blue # center # showOrigin)) # withEnvelope triangle'
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let Triad r t f _ = triad
-                           (up,downLeft,downRight) = triangleVector
-                           (fup,fdownLeft,fdownRight) = (up # reflectY ,downLeft # reflectY ,downRight# reflectY )
+                           t1 = triangle 1 # reflectY
+                           (up,downLeft,downRight) = triangleVector t1
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
-                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red # center
-                          --  triangle' = triangle 1.0 # reflectY
-                           nodes = thirdNode # translate  fup
-                            <> fifthNode # translate  fdownRight
-                            <> rootNode #  translate  fdownLeft
-                        in (nodes # center <> triangle' )  # withEnvelope  triangle'
+                           triangle' = closeShape [up, downLeft, downRight, up] red # center
+                           nodes = thirdNode # translate up
+                            <> fifthNode # translate  downRight
+                            <> rootNode #  translate  downLeft
+                        in (nodes # center <> t1 # fillColor red # center # showOrigin)  # withEnvelope triangle'
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
 labeled d Nothing = d
@@ -135,6 +145,7 @@ drawTonnetez :: Triad -> [(Triad, Transform)] -> Int -> M.Map String Int -> Diag
 drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (composeN  moveUp) (reverse [1..contextSize])
                                            downs :: [Triad -> Triad] = map (composeN  moveDown)  [1..contextSize]                                                          
                                            seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs) -- this is the middle column
+
                                            lefts :: [Triad -> Triad] = map (composeN  moveLeft) (reverse [1..contextSize])
                                            rights :: [Triad -> Triad] = map (composeN  moveRight) [1..contextSize]
                                            columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights

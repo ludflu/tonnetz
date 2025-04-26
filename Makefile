@@ -8,7 +8,7 @@ run:
 		--verbose \
 		--mood major \
 		--transform P,R,L \
-		--duration 4
+		--duration 16
 
 #		--randomize 3 \
 

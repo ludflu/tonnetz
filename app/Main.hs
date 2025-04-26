@@ -32,11 +32,11 @@ run args = do
         Just r -> take r randomTransforms
         Nothing -> transforms
       triads = applyTransforms startingTriad tfs
-      transformedTriads = zip (startingTriad : triads) tfs    
+      transformedTriads = zip (startingTriad : triads) tfs
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
 
-      tonnetz = drawTonnetez startingTriad transformedTriads (contextSize args) numberedTriads
+      tonnetz = drawTonnetez startingTriad transformedTriads (contextSize args) M.empty --numberedTriads
    in do when (verbose args) (print args )
          when (verbose args) (print tfs )
          playTriads triads (duration args)
