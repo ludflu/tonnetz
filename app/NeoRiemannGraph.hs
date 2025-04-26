@@ -78,11 +78,11 @@ drawTriad' triad = let Triad r t f _ = triad
                        rootNode = drawNote r
                        thirdNode = drawNote t
                        fifthNode = drawNote f
-                       triangle' = closeShape (getPoints t1)  # center
+                       withTriangleEnvelope = withEnvelope $ closeShape (getPoints t1)  # center
                        nodes = thirdNode # translate up
                          <> fifthNode # translate  downRight
                          <> rootNode #  translate  downLeft
-                   in (nodes # center <> t1 # fillColor tcolor # center # showOrigin)  # withEnvelope triangle'
+                   in (nodes # center <> t1 # fillColor tcolor # center # showOrigin)  # withTriangleEnvelope
 
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
