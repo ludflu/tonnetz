@@ -4,12 +4,12 @@ build:
 
 run:
 	cabal run tonnetz -- \
-		--key Ds \
+		--key C \
 		--verbose \
 		--mood major \
 		--randomize 3 \
 		--transform L,P,R,N \
-		--duration 1
+		--duration 4
 
 
 test:

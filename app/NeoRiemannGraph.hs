@@ -25,10 +25,28 @@ convertVectorToPoint :: (Floating f) => V2 f -> P2 f
 convertVectorToPoint v = let (x,y) = (v ^. _x, v ^. _y)
                           in p2 (x,y)
 
+-- unitY :: (Floating f) => V2 f
+-- unitY = r2 (0,1.0)
+
+transformToVector :: (Floating f) => Transform -> V2 f
+transformToVector t = case t of
+  Leading -> unitY # rotateBy (1/3)
+  Parallel -> unitY
+  Relative -> unitY # rotateBy ((-1)/3)
+  Slide ->  transformToVector Leading  + transformToVector Parallel + transformToVector Relative
+  Nebenverwandt -> transformToVector Relative + transformToVector Parallel + transformToVector Leading  
+  Hexapole -> transformToVector Leading  + transformToVector Parallel + transformToVector Leading  
+
+findVector :: Triad -> Transform -> V2 Double
+findVector triad trans = let mood = findMood triad
+                             vec = transformToVector trans
+                          in case mood of 
+                            Major -> vec
+                            Minor -> -vec
+
 closeShape :: (Color a) => [V2 Double] ->  a -> Diagram B
 closeShape pts c = let closedPts = map convertVectorToPoint pts
                     in strokeLoop (fromVertices closedPts) # fillColor c
-
 
 
 drawMinorTriad :: Triad -> Diagram B
@@ -38,7 +56,6 @@ drawMinorTriad triad = let Triad r t f _ = triad
                            thirdNode = drawNote t
                            fifthNode = drawNote f
                            triangle' = closeShape [up, downLeft, downRight, up] blue # center
-                          --  triangle' = triangle 1.0
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
@@ -111,13 +128,12 @@ composeN  f n = f . composeN f (n-1)
 
 drawTonnetez :: Triad -> Int -> M.Map String Int -> Diagram B
 drawTonnetez t contextSize labels = let ups :: [Triad -> Triad] = map (composeN  moveUp) (reverse [1..contextSize])
-                                        downs :: [Triad -> Triad] = map (composeN  moveDown)  [1..contextSize]                  
-                                        -- this is the middle column
-                                        seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs)
+                                        downs :: [Triad -> Triad] = map (composeN  moveDown)  [1..contextSize]                                                          
+                                        seed :: [Triad] = map ($ t) (ups ++ [id] ++ downs) -- this is the middle column
                                         lefts :: [Triad -> Triad] = map (composeN  moveLeft) (reverse [1..contextSize])
                                         rights :: [Triad -> Triad] = map (composeN  moveRight) [1..contextSize]
                                         columnTransforms :: [Triad -> Triad] = lefts ++ [id] ++ rights
                                         tonnetz = ctf seed columnTransforms
                                         tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
-                                        combineSnug l r = l # snugR <> r # snugL
+                                        combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
                                       in foldl1 combineSnug tcols
