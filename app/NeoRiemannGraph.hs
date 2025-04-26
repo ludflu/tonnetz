@@ -15,17 +15,9 @@ drawNote n = let noteTxt = show $ noteClass n
               in node # scale 0.25
 
 
--- triangleVector :: (Floating f) => (V2 f, V2 f, V2 f)
--- triangleVector = let up = unitY
---                      downLeft = up # rotateBy (1/3)
---                      downRight = up # rotateBy ((-1)/3)
---                   in (up, downLeft, downRight)
-
-
-
 getPoints :: (Floating n, Ord n) => Located (Trail V2 n) -> [V2 n]
 getPoints t = let pts = map unp2 $ trailVertices t
-               in map (uncurry V2) pts               
+               in reverse $ map (uncurry V2) pts               
 
 triangleVector :: (Floating n, Ord n) => Located (Trail V2 n) -> (V2 n, V2 n, V2 n)
 triangleVector t = let pts = getPoints t
