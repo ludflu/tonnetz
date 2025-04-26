@@ -9,9 +9,14 @@ import NeoRiemann
 data CommandArgs = CommandArgs
   { startingKey :: NoteClass,
      startingMood :: Mood,
-   transformations :: [Transform],
+   transformations :: Maybe [Transform],
    contextSize :: Int,
-   randomize :: Maybe Int
+   duration :: Integer,
+   randomize :: Maybe Int,
+   play :: Bool,
+   _help:: Bool,
+   version :: Bool,
+   verbose :: Bool
   } deriving (Show)
 
 parseMood :: ReadM Mood
@@ -86,22 +91,42 @@ commandArgs = CommandArgs
       <> short 'm'
       <> metavar "mood"
       <> help "Mood of the starting chord (major or minor)")
-  <*> option parseTransforms
+  <*> optional (option parseTransforms
       ( long "transform"
       <> short 't'
       <> metavar "TRANSFORMS"
-      <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H) where:\n   L: Leading, P: Parallel, R: Relative, N: Nebenverwandt, S: Slide, H: Hexapole")
+      <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H) where:\n   L: Leading, P: Parallel, R: Relative, N: Nebenverwandt, S: Slide, H: Hexapole"))
   <*> option auto
       ( long "context"
       <> short 'c'
       <> metavar "CONTEXT"
-      <> value 5
+      <> value 4
       <> help "Context size for the transformations (default: 4)")
+  <*> option auto
+      ( long "duration"
+      <> short 'd'
+      <> metavar "DURATION"
+      <> value 4
+      <> help "Duration of each note in the transformations (defaults to quarter note: 4)")
   <*> optional (option auto
       ( long "randomize"
       <> short 'r'
       <> metavar "RANDOMIZE"
       <> help "Randomize the transformations (default: None)"))
+  <*> switch
+      ( long "play"
+      <> short 'p'    
+      <> help "Play the generated transformations using Euterpea (default: False)")
+  <*> switch
+      ( long "help"
+      <> short 'h'
+      <> help "Show this help message")
+  <*> switch
+      ( long "version"
+      <> short 'v'
+      <> help "Show version information")
+  <*> switch
+      ( long "verbose"  )
 
 opts :: ParserInfo CommandArgs
 opts = info (commandArgs <**> helper)

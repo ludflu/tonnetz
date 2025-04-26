@@ -168,4 +168,5 @@ applyTransform Hexapole = hexapole
 applyTransforms :: Triad -> [Transform] -> [Triad]
 applyTransforms = scanl (flip applyTransform)
 
-
+allTransformations :: [Transform]
+allTransformations = [Leading, Parallel, Relative, Slide, Nebenverwandt, Hexapole]

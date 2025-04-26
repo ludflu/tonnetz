@@ -9,9 +9,11 @@ import TonnetzCommands
 import Options.Applicative (execParser)
 import Diagrams.Backend.SVG (renderSVG)
 import qualified Data.Map as M
-import System.Random (initStdGen)
+import System.Random
 import FisherYates
-import Control.Monad (unless)
+import Control.Monad (unless, when)
+import NotesToEuterpea (playTriads)
+import Data.Maybe (fromMaybe)
 
 makeTriad :: NoteClass -> Mood -> Triad
 makeTriad nc m = case m of
@@ -19,25 +21,23 @@ makeTriad nc m = case m of
   Minor -> makeMinorTriad (Note nc 4)
 
 
-allTransformations :: [Transform]
-allTransformations = [Leading, Parallel, Relative, Nebenverwandt, Slide, Hexapole]
-
-
 
 run :: CommandArgs -> IO ()
 run args = do
-  gen <- initStdGen
-  print args
+  gen <- getStdGen
   let startingTriad = makeTriad (startingKey args) (startingMood args)
       (randomTransforms, _) = fisherYates gen allTransformations
+      transforms = fromMaybe allTransformations (transformations args)
       tfs = case randomize args of 
         Just r -> take r randomTransforms
-        Nothing -> transformations args
+        Nothing -> transforms
       triads = applyTransforms startingTriad tfs
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
       tonnetz = drawTonnetez startingTriad (contextSize args) numberedTriads
-   in do print tfs
+   in do when (verbose args) (print args )
+         when (verbose args) (print tfs )
+         playTriads triads (duration args)
          mapM_ (\t -> do
                    putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)
                    let Triad _ _ _ crumbs = t
