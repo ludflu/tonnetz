@@ -55,9 +55,9 @@ findVector triad trans = let mood = findMood triad
 mapVectors :: [(Triad, Transform)] -> [V2 Double]
 mapVectors  = map (uncurry findVector) 
 
-closeShape :: (Color a) => [V2 Double] ->  a -> Diagram B
-closeShape pts c = let closedPts = map convertVectorToPoint pts
-                    in strokeLoop (fromVertices closedPts) # fillColor c
+closeShape :: [V2 Double] ->  Diagram B
+closeShape pts = let closedPts = map convertVectorToPoint pts
+                  in strokeLoop (fromVertices closedPts)
 
 
 drawMinorTriad :: Triad -> Diagram B
@@ -67,7 +67,7 @@ drawMinorTriad triad = let Triad r t f _ = triad
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
-                           triangle' = closeShape [up, downLeft, downRight, up] blue # center
+                           triangle' = closeShape [up, downLeft, downRight, up]  # center
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
@@ -80,7 +80,7 @@ drawMajorTriad triad = let Triad r t f _ = triad
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
-                           triangle' = closeShape [up, downLeft, downRight, up] red # center
+                           triangle' = closeShape [up, downLeft, downRight, up]  # center
                            nodes = thirdNode # translate up
                             <> fifthNode # translate  downRight
                             <> rootNode #  translate  downLeft
