@@ -8,6 +8,7 @@ import Diagrams.Backend.SVG (svgTitle)
 import Diagrams.Prelude
 import qualified Data.Map as M
 
+import Data.Maybe
 
 import Data.Foldable (toList)
 import qualified Data.Sequence as Seq
@@ -182,5 +183,10 @@ drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (compos
                                            combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
                                            tonnetzDiagram = foldl1 combineSnug tcols
                                            vecs  = mapVectors tt
+
+                                           originTriad = lookupName "origin" tonnetzDiagram
+                                           originLocation = fmap location originTriad
+                                           triadOrigin = fromMaybe (p2 (0,0)) originLocation
+
                                            arrowDiagram = makeTheArrows vecs                                          
-                                       in  arrowDiagram <> tonnetzDiagram
+                                       in  arrowDiagram # translate (convertPointToVector triadOrigin) <> tonnetzDiagram
