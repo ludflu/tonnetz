@@ -39,9 +39,9 @@ convertPointToVector p = let (x, y) = unp2 p
 transformToVector :: (Floating f) => Transform -> V2 f
 transformToVector t = case t of
   NeoRiemann.Identity ->  V2 0.0 0.0
-  Leading -> -unitX
-  Parallel -> unitY 
-  Relative -> unitX 
+  Leading -> -(unitX # scaleX (3/4))
+  Parallel -> unitY #scaleY (3/4) 
+  Relative -> unitX #scaleX (3/4)
   Slide ->  transformToVector Leading  + transformToVector Parallel + transformToVector Relative
   Nebenverwandt -> transformToVector Relative + transformToVector Parallel + transformToVector Leading  
   Hexapole -> transformToVector Leading  + transformToVector Parallel + transformToVector Leading  
@@ -60,11 +60,6 @@ closeShape :: [V2 Double] ->  Diagram B
 closeShape pts = let closedPts = map convertVectorToPoint pts
                   in strokeLoop (fromVertices closedPts)
 
-closeShape' :: Located (Trail V2 Double)  ->  Diagram B
-closeShape' trail = let pts = getPoints trail
-                        closedPts = map convertVectorToPoint pts
-                     in strokeLoop (fromVertices closedPts)
-
 drawTriad' :: Triad -> Diagram B
 drawTriad' triad = let Triad r t f _ = triad
                        mood = findMood triad
@@ -72,8 +67,8 @@ drawTriad' triad = let Triad r t f _ = triad
                               Minor ->  blue
                               Major ->  red
                        t1 = case mood of 
-                              Minor -> triangle 1 -- # fillColor blue
-                              Major -> triangle 1 # reflectY -- # fillColor red
+                              Minor -> triangle 1 
+                              Major -> triangle 1 # reflectY
                        (up,downLeft,downRight) = triangleVector t1
                        rootNode = drawNote r
                        thirdNode = drawNote t
@@ -90,18 +85,14 @@ labeled d Nothing = d
 labeled d (Just s) = d # opacity 0.5 <> text (show s) # fontSize (local 0.25) # fc green # center --black # translate (r2 (0, -0.5)) # center
 
 drawTriad ::  M.Map String Int -> Triad -> Diagram B
-drawTriad label triad = let mood = findMood triad
-                            nbr = M.lookup (show triad) label
+drawTriad label triad = let nbr = M.lookup (show triad) label
                             Triad _ _ _ crumbs = triad
                             breadcrumbStr = if null crumbs
                                            then "No transformations"
                                            else "Transformations: " ++ show (reverse crumbs)
-                            withName = if null crumbs then "origin" else ""
+                            name = if null crumbs then "origin" else ""
                             diag = drawTriad' triad
-                            -- diag = case mood of
-                            --          Major -> drawMajorTriad triad
-                            --          Minor -> drawMinorTriad triad
-                         in labeled (diag # svgTitle breadcrumbStr # named withName ) nbr
+                         in labeled (diag # svgTitle breadcrumbStr # named name ) nbr
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of
@@ -157,10 +148,6 @@ windows n0 = go 0 Seq.empty
         s'' = Seq.drop 1 s' -- O(1)
     go _ _ [] = []
 
-addVect :: V2 Double -> V2 Double -> V2 Double
-addVect a b = a + b
-
--- call stack too large
 makeTheArrows :: [V2 Double] -> Diagram B
 makeTheArrows vecs = let vecsums =  V2 0.0 0.0 : vecs
                          pairs = windows 2 vecsums
