@@ -7,7 +7,12 @@ import Diagrams.Backend.SVG.CmdLine (B)
 import Diagrams.Backend.SVG (svgTitle)
 import Diagrams.Prelude
 import qualified Data.Map as M
-import Data.List
+
+
+import Data.Foldable (toList)
+import qualified Data.Sequence as Seq
+import Data.Sequence ((|>))
+
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
                  node = (text noteTxt # fc black # scale 0.75) # center <> circle 0.75 # fc white # center
@@ -140,8 +145,17 @@ makeVects vs = let indx = [0..length vs]
                    groups = map takes indx
                 in map sum groups
 
-windows' :: Int -> [a] -> [[a]]
-windows' n = map (take n) . tails
+windows :: Int -> [a] -> [[a]]
+windows n0 = go 0 Seq.empty
+  where
+    go n s (a:as) | n' <  n0   =              go n' s'  as
+                  | n' == n0   = toList s'  : go n' s'  as
+                  | otherwise =  toList s'' : go n  s'' as
+      where
+        n'  = n + 1         -- O(1)
+        s'  = s Data.Sequence.|> a        -- O(1)
+        s'' = Seq.drop 1 s' -- O(1)
+    go _ _ [] = []
 
 addVect :: V2 Double -> V2 Double -> V2 Double
 addVect a b = a + b
@@ -149,7 +163,7 @@ addVect a b = a + b
 -- call stack too large
 makeTheArrows :: [V2 Double] -> Diagram B
 makeTheArrows vecs = let vecsums = makeVects vecs
-                         pairs = windows' 2 vecsums
+                         pairs = windows 2 vecsums
                          linez :: [(P2 Double,V2 Double )] = map (\ls ->  (convertVectorToPoint (head ls) , ls !! 1)) pairs
                          arrowz  =  map (uncurry arrowAt) linez
                       in foldl1 (<>) arrowz
