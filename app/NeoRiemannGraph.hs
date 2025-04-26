@@ -43,10 +43,13 @@ closeShape ::  [V2 Double] ->  Diagram B
 closeShape pts = let closedPts = map convertVectorToPoint pts
                   in strokeLoop (fromVertices closedPts) 
 
+getPoints :: (Floating n, Ord n) => Located (Trail V2 n) -> [V2 n]
+getPoints t = let pts = map unp2 $ trailVertices t
+               in map (uncurry V2) pts               
+
 triangleVector :: (Floating n, Ord n) => Located (Trail V2 n) -> (V2 n, V2 n, V2 n)
-triangleVector t = let pts = map unp2 $ trailVertices t
-                       ppts = map (uncurry V2) pts               
-                    in (head ppts, ppts !! 1 , ppts !! 2)
+triangleVector t = let pts = getPoints t
+                    in (head pts, pts !! 1 , pts !! 2)
 
 
 drawMinorTriad :: Triad -> Diagram B
