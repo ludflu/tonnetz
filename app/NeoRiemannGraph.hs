@@ -7,8 +7,6 @@ import Diagrams.Backend.SVG.CmdLine (B)
 import Diagrams.Backend.SVG (svgTitle)
 import Diagrams.Prelude
 import qualified Data.Map as M
-import Data.Maybe
-import Data.IntMap (mapAccum)
 import Data.List
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
@@ -136,7 +134,7 @@ composeN  f 1 = f
 composeN  f n = f . composeN f (n-1) 
 
 
---makeVects :: [Int] -> [Int]
+makeVects :: Floating b => [V2 b] -> [V2 b]
 makeVects vs = let indx = [0..length vs]
                    takes = flip take vs
                    groups = map takes indx
@@ -145,16 +143,16 @@ makeVects vs = let indx = [0..length vs]
 windows' :: Int -> [a] -> [[a]]
 windows' n = map (take n) . tails
 
+addVect :: V2 Double -> V2 Double -> V2 Double
+addVect a b = a + b
 
-makeTheArrows :: [(Triad, Transform)] -> Diagram B
-makeTheArrows tt = let vecs = mapVectors tt
-                       vecsums = makeVects vecs
-                       pairs = windows' 2 vecsums
-                       points = map (\ls ->  p2 (head ls , ls !! 1)) pairs
-                       pointPairs' = windows' 2 points
-                       pointPairs'' = map (\ls ->  (head ls , convertPointToVector (ls !! 1))) pointPairs'
-                       arrowz =  map (uncurry arrowAt) pointPairs''
-                    in foldl1 (<>) arrowz 
+-- call stack too large
+makeTheArrows :: [V2 Double] -> Diagram B
+makeTheArrows vecs = let vecsums = makeVects vecs
+                         pairs = windows' 2 vecsums
+                         linez :: [(P2 Double,V2 Double )] = map (\ls ->  (convertVectorToPoint (head ls) , ls !! 1)) pairs
+                         arrowz  =  map (uncurry arrowAt) linez
+                      in foldl1 (<>) arrowz
 
 
 --draws a tonnez with the passed in triad as the center / origin
@@ -169,9 +167,6 @@ drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (compos
                                            tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
                                            combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
                                            tonnetzDiagram = foldl1 combineSnug tcols
-                                           arrowDiagram = makeTheArrows tt
-                                          --  originTriadDiagram = lookupName "origin" tonnetzDiagram
-                                          --  originLocation = fmap location originTriadDiagram
-                                          --  triadOrigin = fromMaybe (p2 (0,0)) originLocation
-
-                                       in  tonnetzDiagram <> arrowDiagram
+                                           vecs  = mapVectors tt
+                                           arrowDiagram = makeTheArrows vecs                                          
+                                       in  arrowDiagram <> tonnetzDiagram
