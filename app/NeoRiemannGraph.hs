@@ -43,9 +43,9 @@ findVector triad trans = let mood = findMood triad
 mapVectors :: [(Triad, Transform)] -> [V2 Double]
 mapVectors  = map (uncurry findVector) 
 
-closeShape :: (Color a) => [V2 Double] ->  a -> Diagram B
-closeShape pts c = let closedPts = map convertVectorToPoint pts
-                    in strokeLoop (fromVertices closedPts) # fillColor c
+closeShape ::  [V2 Double] ->  Diagram B
+closeShape pts = let closedPts = map convertVectorToPoint pts
+                  in strokeLoop (fromVertices closedPts) 
 
 
 drawMinorTriad :: Triad -> Diagram B
@@ -54,11 +54,11 @@ drawMinorTriad triad = let Triad r t f _ = triad
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
-                           triangle' = closeShape [up, downLeft, downRight, up] blue # center
+                           triangle' = closeShape [up, downLeft, downRight, up]  # center
                            nodes = thirdNode # translate up
                             <> fifthNode # translate downRight
                             <> rootNode # translate downLeft
-                        in (nodes # center <> (triangle' # showOrigin)) # withEnvelope triangle'
+                        in (nodes # center <> (triangle' # fillColor blue # center # showOrigin)) # withEnvelope triangle'
 
 drawMajorTriad :: Triad -> Diagram B
 drawMajorTriad triad = let Triad r t f _ = triad
@@ -67,12 +67,11 @@ drawMajorTriad triad = let Triad r t f _ = triad
                            rootNode = drawNote r
                            thirdNode = drawNote t
                            fifthNode = drawNote f
-                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup] red # center
-                          --  triangle' = triangle 1.0 # reflectY
+                           triangle' = closeShape [fup, fdownLeft, fdownRight, fup]  # center
                            nodes = thirdNode # translate  fup
                             <> fifthNode # translate  fdownRight
                             <> rootNode #  translate  fdownLeft
-                        in (nodes # center <> triangle' )  # withEnvelope  triangle'
+                        in (nodes # center <> triangle' #fillColor red # center )  # withEnvelope  triangle'
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
 labeled d Nothing = d
