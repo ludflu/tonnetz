@@ -82,7 +82,7 @@ drawTriad' triad = let Triad r t f _ = triad
 
 labeled :: Diagram B -> Maybe Int -> Diagram B
 labeled d Nothing = d
-labeled d (Just s) = d # opacity 0.5 <> text (show s) # fontSize (local 0.25) # fc green # center --black # translate (r2 (0, -0.5)) # center
+labeled d (Just s) =  text (show s) # fontSize (local 0.25) # fc green # center <> d --black # translate (r2 (0, -0.5)) # center
 
 makeName :: Triad -> String
 makeName t = let chordName = show t
@@ -173,11 +173,11 @@ drawTonnetez t tt contextSize labels = let ups :: [Triad -> Triad] = map (compos
                                            tcols ::[Diagram B] =  map (makeTriadColumn labels) tonnetz
                                            combineSnug l r = l # snugR <> r # snugL  --ensure triangle fit together by draw the diagrams snug against each other,  following the shape's envelope/trace
                                            tonnetzDiagram = foldl1 combineSnug tcols
-                                           vecs  = mapVectors tt
-
-                                           originTriad = lookupName "origin" tonnetzDiagram
-                                           originLocation = fmap location originTriad
-                                           triadOrigin = fromMaybe (p2 (0,0)) originLocation
-
-                                           arrowDiagram = makeTheArrows vecs                                          
-                                       in  arrowDiagram # translate (convertPointToVector triadOrigin) <> tonnetzDiagram
+                                           
+                                          --  vecs  = mapVectors tt
+                                          --  originTriad = lookupName "origin" tonnetzDiagram
+                                          --  originLocation = fmap location originTriad
+                                          --  triadOrigin = fromMaybe (p2 (0,0)) originLocation
+                                          --  arrowDiagram = makeTheArrows vecs                                          
+                                      --  in  arrowDiagram # translate (convertPointToVector triadOrigin) <> tonnetzDiagram
+                                       in  tonnetzDiagram

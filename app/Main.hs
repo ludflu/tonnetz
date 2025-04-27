@@ -36,7 +36,7 @@ run args = do
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
 
-      tonnetz = drawTonnetez startingTriad transformedTriads (contextSize args) M.empty --numberedTriads
+      tonnetz = drawTonnetez startingTriad transformedTriads (contextSize args) numberedTriads
    in do when (verbose args) (print args )
          when (verbose args) (print tfs )
          playTriads triads (duration args)
