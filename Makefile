@@ -12,8 +12,6 @@ run:
 		--context 10 \
 		--midi output.mid
 
-#		--randomize 3 \
-
 test:
 	cabal test
 

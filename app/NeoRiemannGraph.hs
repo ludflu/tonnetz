@@ -3,6 +3,15 @@
 module NeoRiemannGraph where
 
 import NeoRiemann
+    ( findMood,
+      leading,
+      parallel,
+      relative,
+      slide,
+      Mood(Minor, Major),
+      Note(noteClass),
+      Transform(..),
+      Triad(Triad, breadcrumbs) )
 import Diagrams.Backend.SVG.CmdLine (B)
 import Diagrams.Backend.SVG (svgTitle)
 import Diagrams.Prelude
@@ -16,7 +25,7 @@ import Data.Sequence ((|>))
 
 drawNote :: Note -> Diagram B
 drawNote n = let noteTxt = show $ noteClass n
-                 node = (text noteTxt # fc black # scale 0.75) # center <> circle 0.75 # fc white # center
+                 node = (text noteTxt # fc black # scale 0.75) # center <> circle 0.75 # lwL 0.01 # fc white # center
               in node # scale 0.25
 
 
@@ -60,24 +69,21 @@ closeShape :: [V2 Double] ->  Diagram B
 closeShape pts = let closedPts = map convertVectorToPoint pts
                   in strokeLoop (fromVertices closedPts)
 
-drawTriad' :: Triad -> Diagram B
-drawTriad' triad = let Triad r t f _ = triad
-                       mood = findMood triad
-                       tcolor = case mood of 
-                              Minor ->  blue
-                              Major ->  red
-                       t1 = case mood of 
-                              Minor -> triangle 1 
-                              Major -> triangle 1 # reflectY
-                       (left,up,right) = triangleVector t1
-                       rootNode = drawNote r
-                       thirdNode = drawNote t
-                       fifthNode = drawNote f
-                       withTriangleEnvelope = withEnvelope $ closeShape (getPoints t1)  # center
-                       nodes = rootNode #  translate  left
-                               <> thirdNode # translate up
-                               <> fifthNode # translate  right
-
+drawTriad :: Triad -> Diagram B
+drawTriad triad = let Triad r t f _ = triad
+                      mood = findMood triad
+                      tcolor = case mood of 
+                             Minor ->  blue
+                             Major ->  red
+                      t1 = case mood of 
+                             Minor -> triangle 1 
+                             Major -> triangle 1 # reflectY
+                      (left,up,right) = triangleVector t1
+                      root  = drawNote r # translate left
+                      third = drawNote t # translate up
+                      fifth = drawNote f # translate right
+                      withTriangleEnvelope = withEnvelope $ closeShape (getPoints t1)  # center
+                      nodes = root <> third <> fifth 
                    in (nodes # center <> t1 # fillColor tcolor # center # showOrigin)  # withTriangleEnvelope
 
 
@@ -94,11 +100,11 @@ makeName t = let chordName = show t
               in name
 
 
-drawTriad ::  M.Map String Int -> Triad -> Diagram B
-drawTriad label triad = let nbr = M.lookup (show triad) label
-                            name = makeName triad
-                            diag = drawTriad' triad
-                         in labeled (diag # svgTitle name # named name ) nbr
+drawLabeledTriad ::  M.Map String Int -> Triad -> Diagram B
+drawLabeledTriad label triad = let nbr = M.lookup (show triad) label
+                                   name = makeName triad
+                                   diag = drawTriad triad
+                                in labeled (diag # svgTitle name # named name ) nbr
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of
@@ -121,7 +127,7 @@ moveDown t = case findMood t of
   Minor -> parallel t
 
 makeTriadColumn :: M.Map String Int -> [Triad] ->  Diagram B
-makeTriadColumn labels ts = let triads = map (drawTriad labels) ts
+makeTriadColumn labels ts = let triads = map (drawLabeledTriad labels) ts
                              in foldl1 (===) triads
 
 ctf :: [Triad] -> [Triad -> Triad] -> [[Triad]]
