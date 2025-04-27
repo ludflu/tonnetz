@@ -7,8 +7,9 @@ run:
 		--key C \
 		--verbose \
 		--mood major \
-		--transform P,R,L \
-		--duration 16
+		--transform R,L,P,L \
+		--duration 4 \
+		--context 10
 
 #		--randomize 3 \
 

@@ -39,9 +39,9 @@ convertPointToVector p = let (x, y) = unp2 p
 transformToVector :: (Floating f) => Transform -> V2 f
 transformToVector t = case t of
   NeoRiemann.Identity ->  V2 0.0 0.0
-  Leading -> -(unitX # scaleX (3/4))
-  Parallel -> unitY #scaleY (3/4) 
-  Relative -> unitX #scaleX (3/4)
+  Leading ->  unitY # rotateBy (3/8)  -- -(unitX # scaleX (3/4))
+  Parallel -> unitY  
+  Relative -> unitY # rotateBy (5/8)
   Slide ->  transformToVector Leading  + transformToVector Parallel + transformToVector Relative
   Nebenverwandt -> transformToVector Relative + transformToVector Parallel + transformToVector Leading  
   Hexapole -> transformToVector Leading  + transformToVector Parallel + transformToVector Leading  
@@ -84,15 +84,20 @@ labeled :: Diagram B -> Maybe Int -> Diagram B
 labeled d Nothing = d
 labeled d (Just s) = d # opacity 0.5 <> text (show s) # fontSize (local 0.25) # fc green # center --black # translate (r2 (0, -0.5)) # center
 
+makeName :: Triad -> String
+makeName t = let chordName = show t
+                 crumbs = breadcrumbs t
+                 trail = show (reverse (breadcrumbs t))
+                 fullName = chordName ++ ": " ++ trail
+                 name = if null crumbs then "origin" else fullName
+              in name
+
+
 drawTriad ::  M.Map String Int -> Triad -> Diagram B
 drawTriad label triad = let nbr = M.lookup (show triad) label
-                            Triad _ _ _ crumbs = triad
-                            breadcrumbStr = if null crumbs
-                                           then "No transformations"
-                                           else "Transformations: " ++ show (reverse crumbs)
-                            name = if null crumbs then "origin" else ""
+                            name = makeName triad
                             diag = drawTriad' triad
-                         in labeled (diag # svgTitle breadcrumbStr # named name ) nbr
+                         in labeled (diag # svgTitle name # named name ) nbr
 
 moveRight :: Triad -> Triad
 moveRight t = case findMood t of
