@@ -69,15 +69,15 @@ drawTriad' triad = let Triad r t f _ = triad
                        t1 = case mood of 
                               Minor -> triangle 1 
                               Major -> triangle 1 # reflectY
-                      --  (up,downLeft,downRight) = triangleVector t1
-                       (downRight,up,downLeft) = triangleVector t1
+                       (left,up,right) = triangleVector t1
                        rootNode = drawNote r
                        thirdNode = drawNote t
                        fifthNode = drawNote f
                        withTriangleEnvelope = withEnvelope $ closeShape (getPoints t1)  # center
-                       nodes = thirdNode # translate up
-                         <> fifthNode # translate  downRight
-                         <> rootNode #  translate  downLeft
+                       nodes = rootNode #  translate  left
+                               <> thirdNode # translate up
+                               <> fifthNode # translate  right
+
                    in (nodes # center <> t1 # fillColor tcolor # center # showOrigin)  # withTriangleEnvelope
 
 
