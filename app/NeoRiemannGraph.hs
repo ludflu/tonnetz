@@ -69,7 +69,8 @@ drawTriad' triad = let Triad r t f _ = triad
                        t1 = case mood of 
                               Minor -> triangle 1 
                               Major -> triangle 1 # reflectY
-                       (up,downLeft,downRight) = triangleVector t1
+                      --  (up,downLeft,downRight) = triangleVector t1
+                       (downRight,up,downLeft) = triangleVector t1
                        rootNode = drawNote r
                        thirdNode = drawNote t
                        fifthNode = drawNote f
