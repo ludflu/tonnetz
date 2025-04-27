@@ -12,8 +12,8 @@ import qualified Data.Map as M
 import System.Random
 import FisherYates
 import Control.Monad (unless, when)
-import NotesToEuterpea (playTriads)
-import Data.Maybe (fromMaybe)
+import NotesToEuterpea (playTriads, writeTriads)
+import Data.Maybe (fromMaybe, isJust, fromJust)
 
 makeTriad :: NoteClass -> Mood -> Triad
 makeTriad nc m = case m of
@@ -35,11 +35,11 @@ run args = do
       transformedTriads = zip (startingTriad : triads) tfs
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
-
       tonnetz = drawTonnetez startingTriad transformedTriads (contextSize args) numberedTriads
    in do when (verbose args) (print args )
          when (verbose args) (print tfs )
-         playTriads triads (duration args)
+         when (play args) $ playTriads triads (duration args)  
+         when (isJust $ midi args) $ writeTriads (fromJust $ midi args)   triads (duration args)
          mapM_ (\t -> do
                    putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)
                    let Triad _ _ _ crumbs = t

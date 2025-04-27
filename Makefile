@@ -9,7 +9,8 @@ run:
 		--mood major \
 		--transform R,L,P,L \
 		--duration 4 \
-		--context 10
+		--context 10 \
+		--midi output.mid
 
 #		--randomize 3 \
 

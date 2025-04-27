@@ -2,7 +2,6 @@ module NotesToEuterpea where
 
 import Euterpea 
 import qualified NeoRiemann (Note(..), NoteClass(..), Triad(..)) 
-import Diagrams (Renderable(render))
 
 -- | Convert a NeoRiemann Note to Euterpea's Pitch
 noteToEuterpea :: NeoRiemann.Note -> Pitch
@@ -49,3 +48,9 @@ playTriads triads dur' = do
       music = renderTriadSequence duration' triads 
    in play $ rest duration' :+: music :+: rest duration'
 
+
+writeTriads :: FilePath -> [NeoRiemann.Triad] -> Integer -> IO ()
+writeTriads fp triads dur' = do
+  let duration' = 1 / fromIntegral dur' :: Dur
+      music = renderTriadSequence duration' triads 
+   in writeMidi fp $ rest duration' :+: music :+: rest duration'

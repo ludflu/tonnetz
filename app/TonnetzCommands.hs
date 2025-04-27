@@ -16,7 +16,8 @@ data CommandArgs = CommandArgs
    play :: Bool,
    _help:: Bool,
    version :: Bool,
-   verbose :: Bool
+   verbose :: Bool,
+   midi :: Maybe FilePath
   } deriving (Show)
 
 parseMood :: ReadM Mood
@@ -127,6 +128,8 @@ commandArgs = CommandArgs
       <> help "Show version information")
   <*> switch
       ( long "verbose"  )
+  <*> optional ( strOption 
+      (long "midi" <> short 'm' <> metavar "MIDI" <> help "a filepath to write MIDI output" ))
 
 opts :: ParserInfo CommandArgs
 opts = info (commandArgs <**> helper)
