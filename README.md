@@ -24,9 +24,21 @@ This program takes a starting chord (C major by default) and applies a sequence 
 
 ## Usage
 
-tonnetz (-k|--key key)
-        (-m|--mood mood major| minor)
-        (-t|--transform TRANSFORMS L,P,R,N,S,H)
-        [-c|--context CONTEXT]
+Usage: tonnetz (-k|--key key) (-m|--mood mood) [-t|--transform TRANSFORMS]
+               [-c|--context CONTEXT] [-d|--duration DURATION]
+               [-r|--randomize RANDOMIZE] [-p|--play] [-h|--help] [-v|--version]
+               [--verbose] [-m|--midi MIDI]
 
 Generate Chord paths through the Tonnetz via neo-reimann triad transformations
+
+## TODO
+
+- since we have chords, create an arpegiator
+- stochastic variations on arp
+    - leapfrog (skip a certain number of notes in the sequnce)
+    - jump on scale itervals
+    - ascend
+    - descend
+    - ornament ?
+
+- instead of a list of NR transform, pick a list of scale degrees in the classic form (i-iv-v-i)
