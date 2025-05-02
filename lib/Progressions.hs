@@ -15,3 +15,7 @@ makeProgression triad@(Triad r t f _) progression mood = let scalePattern = case
                                                                 Major -> makeMajorTriad newRoot
                                                                 Minor -> makeMinorTriad newRoot
                                                           in newTriad
+
+makeProgressions :: Triad -> [(Progression,Mood)] -> [Triad]
+makeProgressions t pgs = let progTxf = uncurry $ makeProgression t
+                          in map progTxf pgs
