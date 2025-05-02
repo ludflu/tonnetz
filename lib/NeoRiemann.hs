@@ -14,6 +14,8 @@ data Transform = Identity | Leading | Parallel | Relative | Slide | Nebenverwand
 data NoteClass = C | Cs| D| Ds | E | F | Fs | G | Gs | A | As | B
     deriving (Eq, Ord, Enum)
 
+newtype ScaleFamily = ScaleFamily [Int]
+
 type Es = F
 type Bs = C
 
@@ -47,11 +49,17 @@ instance Show NoteClass where
     show As = "A#"
     show B  = "B"
 
-majorThird :: Interval
-majorThird = 4
+halfStep :: Interval
+halfStep = 1
+
+wholeStep :: Interval
+wholeStep = 2
 
 minorThird :: Interval
 minorThird = 3
+
+majorThird :: Interval
+majorThird = 4
 
 perfectFifth :: Interval
 perfectFifth = 7
@@ -62,25 +70,25 @@ calcSemitones n =  let o = octave n
                     in fromEnum nc + 12 * o
 
 
-raise :: Interval -> Note -> Note
-raise i n = let
+raise :: Note -> Interval -> Note
+raise n i  = let
                 translatedNoteIdx = fromEnum (noteClass n) + i
                 translatedNote = toEnum (translatedNoteIdx `mod` 12)
                 translatedOctave = octave n + translatedNoteIdx `div` 12
-            in Note translatedNote translatedOctave
+             in Note translatedNote translatedOctave
 
-lower :: Interval -> Note -> Note
-lower = raise . negate
+lower :: Note -> Interval -> Note
+lower n i = raise n (-i)
 
 calcInterval :: Note -> Note -> Interval
 calcInterval n1 n2 = let i = calcSemitones n2 - calcSemitones n1
                       in i `mod` 12
 
 makeMajorTriad :: Note -> Triad
-makeMajorTriad r = Triad r (raise majorThird r) (raise perfectFifth r) []
+makeMajorTriad r = Triad r (raise r majorThird ) (raise r perfectFifth) []
 
 makeMinorTriad :: Note -> Triad
-makeMinorTriad r = Triad r (raise minorThird r) (raise perfectFifth r) []
+makeMinorTriad r = Triad r (raise r minorThird) (raise r perfectFifth) []
 
 
 findMood :: Triad -> Mood
@@ -110,8 +118,8 @@ cleanCrumbs (Triad r t f crumbs) = Triad r t f (removeDupes crumbs)
 parallel :: Triad -> Triad
 parallel triad@(Triad r t f crumbs) = let mood = findMood triad
                                        in case mood of
-                                           Major -> Triad r (lower 1 t) f $ removeDupes (Parallel : crumbs)
-                                           Minor -> Triad r (raise 1 t) f $ removeDupes (Parallel : crumbs)
+                                           Major -> Triad r (lower t 1 ) f $ removeDupes (Parallel : crumbs)
+                                           Minor -> Triad r (raise t 1) f $ removeDupes (Parallel : crumbs)
 
 
 
@@ -121,8 +129,8 @@ parallel triad@(Triad r t f crumbs) = let mood = findMood triad
 relative :: Triad -> Triad
 relative triad@(Triad r t f crumbs) = let mood = findMood triad
                                        in case mood of
-                                           Major -> Triad (raise 2 f) r t $ removeDupes (Relative : crumbs)
-                                           Minor -> Triad t f (lower 2 r) $ removeDupes (Relative : crumbs)
+                                           Major -> Triad (raise f 2) r t $ removeDupes (Relative : crumbs)
+                                           Minor -> Triad t f (lower r 2) $ removeDupes (Relative : crumbs)
 
 
 
@@ -132,8 +140,8 @@ relative triad@(Triad r t f crumbs) = let mood = findMood triad
 leading :: Triad -> Triad
 leading triad@(Triad r t f crumbs) = let mood = findMood triad
                                      in case mood of
-                                         Major -> Triad t f (lower 1 r) $ removeDupes (Leading : crumbs)
-                                         Minor -> Triad (raise 1 f) r t $ removeDupes (Leading : crumbs)
+                                         Major -> Triad t f (lower r 1) $ removeDupes (Leading : crumbs)
+                                         Minor -> Triad (raise f 1)  r t $ removeDupes (Leading : crumbs)
 
 
 
@@ -172,3 +180,17 @@ applyTransforms = scanl (flip applyTransform)
 
 allTransformations :: [Transform]
 allTransformations = [Leading, Parallel, Relative, Slide, Nebenverwandt, Hexapole]
+
+major :: ScaleFamily
+major= ScaleFamily [wholeStep, wholeStep, halfStep, wholeStep, wholeStep, wholeStep, halfStep, wholeStep]
+minor :: ScaleFamily
+minor= ScaleFamily [wholeStep, halfStep, wholeStep, wholeStep, halfStep, wholeStep, wholeStep, wholeStep]
+
+patternToSemitones :: [Int] -> [Int]
+patternToSemitones pat = init $ scanl1 (+) (0:pat)
+
+-- given a scale pattern, a root note, and a duration, return the scale of notes
+makeScale :: ScaleFamily -> Note ->  [Note]
+makeScale (ScaleFamily ptn) n  = let translateNote = raise n 
+                                     semis = patternToSemitones ptn
+                                  in map translateNote semis
