@@ -186,6 +186,11 @@ major= ScaleFamily [wholeStep, wholeStep, halfStep, wholeStep, wholeStep, wholeS
 minor :: ScaleFamily
 minor= ScaleFamily [wholeStep, halfStep, wholeStep, wholeStep, halfStep, wholeStep, wholeStep, wholeStep]
 
+majorPentatonic :: ScaleFamily
+majorPentatonic= ScaleFamily [wholeStep, wholeStep, minorThird, wholeStep, majorThird]
+minorPentatonic :: ScaleFamily
+minorPentatonic= ScaleFamily [minorThird, wholeStep, wholeStep, minorThird, wholeStep]
+
 patternToSemitones :: [Int] -> [Int]
 patternToSemitones pat = init $ scanl1 (+) (0:pat)
 

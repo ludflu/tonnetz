@@ -74,6 +74,7 @@ executable tonnetz
                  , NeoRiemann
                  , NeoRiemannGraph
                  , NotesToEuterpea
+                 , Progressions
                  
     build-depends:    base ^>=4.17.2.1
         , modular-arithmetic
