@@ -5,8 +5,10 @@ import Data.Char (toUpper, isUpper)
 
 data Progression = I | II | III | IV | V | VI | VII deriving (Enum, Eq, Show)
 
+
+
 makeProgression :: Triad -> Progression -> Mood -> Triad
-makeProgression triad@(Triad r t f _) progression mood = let scalePattern = case mood of
+makeProgression triad@(Triad r _ _ _) progression mood = let scalePattern = case findMood triad of
                                                                 Minor -> minor
                                                                 Major -> major
                                                              scale = makeScale scalePattern r
@@ -47,5 +49,3 @@ readProgressions pstr = map parseProgression $ splitOn '-' pstr
     toProgression "VII"  = VII
     toProgression s      = error $ "Invalid progression symbol: " ++ s
     
-    isUpper :: Char -> Bool
-    isUpper c = c `elem` ['A'..'Z']

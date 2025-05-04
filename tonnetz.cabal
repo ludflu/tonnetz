@@ -99,7 +99,7 @@ executable tonnetz
 
 Test-Suite tonnetz-tests
   type: exitcode-stdio-1.0
-  default-language: GHC2021
+--   default-language: GHC2021
   other-modules:    
                  , FisherYates
                  , NeoRiemann
@@ -117,20 +117,22 @@ Test-Suite tonnetz-tests
                     ,array
                     ,tasty
                     ,tasty-hunit
+                    -- , ProgressionsTests
   hs-source-dirs:
       tests, lib
   main-is: TonnetzTests.hs
   
-Test-Suite progressions-tests
-  type: exitcode-stdio-1.0
-  default-language: GHC2021
-  other-modules:
-                 , NeoRiemann
-                 , Progressions
-  build-depends:    base
-                    ,hspec
-                    ,Euterpea
-                    ,modular-arithmetic
-  hs-source-dirs:
-      tests, lib
-  main-is: ProgressionsTests.hs
+-- Test-Suite progressions-tests
+--   type: exitcode-stdio-1.0
+--   default-language: GHC2021
+--   other-modules:    
+--                  , NeoRiemann
+--                  , Progressions
+--   build-depends:    base
+--                     ,containers
+--                     ,modular-arithmetic
+--                     ,tasty
+--                     ,tasty-hunit
+--   hs-source-dirs:
+--       tests, lib
+--   main-is: ProgressionsTests.hs

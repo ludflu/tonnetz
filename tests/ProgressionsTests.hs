@@ -1,72 +1,95 @@
 module ProgressionsTests where
 
-import Test.Hspec
-import NeoRiemann
+import Data.Foldable
+import Test.Tasty (TestTree, defaultMain, testGroup)
+import Test.Tasty.HUnit (assertBool, assertEqual, testCase)
+
 import Progressions
+import NeoRiemann
 
 testNote :: Note
 testNote = Note C 4
 
-testMoodDetection :: Spec
-testMoodDetection = describe "Mood detection in progression parsing" $ do
-  it "detects uppercase as Major" $ do
-    let result = snd $ head $ readProgressions "I"
-    result `shouldBe` Major
-  
-  it "detects lowercase as Minor" $ do
-    let result = snd $ head $ readProgressions "i"
-    result `shouldBe` Minor
+testMoodDetection :: TestTree
+testMoodDetection =
+  testGroup
+    "Mood detection in progression parsing"
+    [ testCase "Detects uppercase as Major" $
+        assertEqual
+          "Major mood"
+          Major
+          (snd $ head $ readProgressions "I"),
+      testCase "Detects lowercase as Minor" $
+        assertEqual
+          "Minor mood"
+          Minor
+          (snd $ head $ readProgressions "i")
+    ]
 
-testProgressionParsing :: Spec
-testProgressionParsing = describe "Progression parsing" $ do
-  it "parses single numeral correctly" $ do
-    let result = fst $ head $ readProgressions "IV"
-    result `shouldBe` IV
-  
-  it "parses single lowercase numeral correctly" $ do
-    let result = fst $ head $ readProgressions "vi"
-    result `shouldBe` VI
-  
-  it "parses multiple progressions correctly" $ do
-    let result = readProgressions "I-V-vi-IV"
-    result `shouldBe` [(I, Major), (V, Major), (VI, Minor), (IV, Major)]
+testProgressionParsing :: TestTree
+testProgressionParsing =
+  testGroup
+    "Progression parsing"
+    [ testCase "Parses single numeral correctly" $
+        assertEqual
+          "IV progression"
+          IV
+          (fst $ head $ readProgressions "IV"),
+      testCase "Parses single lowercase numeral correctly" $
+        assertEqual
+          "VI progression"
+          VI
+          (fst $ head $ readProgressions "vi"),
+      testCase "Parses multiple progressions correctly" $
+        assertEqual
+          "I-V-vi-IV chord progression"
+          [(I, Major), (V, Major), (VI, Minor), (IV, Major)]
+          (readProgressions "I-V-vi-IV")
+    ]
 
-testMakeProgression :: Spec
-testMakeProgression = describe "Making progression triads" $ do
-  it "creates correct triad for I in C major" $ do
-    let triad = makeMajorTriad testNote
-        result = makeProgression triad I Major
-    root result `shouldBe` Note C 4
-    findMood result `shouldBe` Major
-  
-  it "creates correct triad for V in C major" $ do
-    let triad = makeMajorTriad testNote
-        result = makeProgression triad V Major
-    root result `shouldBe` Note G 4
-    findMood result `shouldBe` Major
-  
-  it "creates correct triad for vi in C major" $ do
-    let triad = makeMajorTriad testNote
-        result = makeProgression triad VI Major
-    root result `shouldBe` Note A 4
-    findMood result `shouldBe` Minor
+testMakeProgression :: TestTree
+testMakeProgression =
+  testGroup
+    "Making progression triads"
+    [ testCase "Creates correct triad for I in C major" $ do
+        let triad = makeMajorTriad testNote
+            result = makeProgression triad I Major
+        assertEqual "Root note" (Note C 4) (root result)
+        assertEqual "Mood" Major (findMood result),
+      testCase "Creates correct triad for V in C major" $ do
+        let triad = makeMajorTriad testNote
+            result = makeProgression triad V Major
+        assertEqual "Root note" (Note G 4) (root result)
+        assertEqual "Mood" Major (findMood result),
+      testCase "Creates correct triad for vi in C major" $ do
+        let triad = makeMajorTriad testNote
+            result = makeProgression triad VI Minor
+        assertEqual "Root note" (Note A 4) (root result)
+        assertEqual "Mood" Minor (findMood result)
+    ]
 
-testMakeProgressions :: Spec
-testMakeProgressions = describe "Making multiple progressions" $ do
-  it "creates a correct progression sequence" $ do
-    let triad = makeMajorTriad testNote
-        prog = readProgressions "I-V-vi-IV"
-        result = makeProgressions triad prog
-    length result `shouldBe` 4
-    map root result `shouldBe` [Note C 4, Note G 4, Note A 4, Note F 4]
-    map findMood result `shouldBe` [Major, Major, Minor, Major]
+testMakeProgressions :: TestTree
+testMakeProgressions =
+  testGroup
+    "Making multiple progressions"
+    [ testCase "Creates a correct progression sequence" $ do
+        let triad = makeMajorTriad testNote
+            prog = readProgressions "I-V-vi-IV"
+            result = makeProgressions triad prog
+        assertEqual "Sequence length" 4 (length result)
+        assertEqual "Root notes" 
+                   [Note C 4, Note G 4, Note A 4, Note F 4] 
+                   (map root result)
+        assertEqual "Moods"
+                   [Major, Major, Minor, Major]
+                   (map findMood result)
+    ]
 
-spec :: Spec
-spec = do
-  testMoodDetection
-  testProgressionParsing
-  testMakeProgression
-  testMakeProgressions
+progTests :: TestTree
+progTests = testGroup "Progressions Tests" 
+  [ testMoodDetection
+  , testProgressionParsing
+  , testMakeProgression
+  , testMakeProgressions
+  ]
 
-main :: IO ()
-main = hspec spec
