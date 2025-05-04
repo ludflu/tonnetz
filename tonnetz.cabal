@@ -74,6 +74,7 @@ executable tonnetz
                  , NeoRiemann
                  , NeoRiemannGraph
                  , NotesToEuterpea
+                 , Progressions
                  
     build-depends:    base ^>=4.17.2.1
         , modular-arithmetic
@@ -96,15 +97,15 @@ executable tonnetz
     -- Base language which the package is written in.
     default-language: GHC2021
 
-Test-Suite tonnetez-tests
+Test-Suite tonnetz-tests
   type: exitcode-stdio-1.0
-  other-modules:                  
-                 , TonnetzCommands
+--   default-language: GHC2021
+  other-modules:    
                  , FisherYates
                  , NeoRiemann
-                 , NeoRiemannGraph
-                 , Tonnetz
-                 , TonnetzTests
+                 , Progressions
+                 , ProgressionsTests
+                 , NeoRiemannTests
   build-depends:    base
                     ,containers
                     ,hashable
@@ -121,3 +122,18 @@ Test-Suite tonnetez-tests
   hs-source-dirs:
       tests, lib
   main-is: TonnetzTests.hs
+  
+-- Test-Suite progressions-tests
+--   type: exitcode-stdio-1.0
+--   default-language: GHC2021
+--   other-modules:    
+--                  , NeoRiemann
+--                  , Progressions
+--   build-depends:    base
+--                     ,containers
+--                     ,modular-arithmetic
+--                     ,tasty
+--                     ,tasty-hunit
+--   hs-source-dirs:
+--       tests, lib
+--   main-is: ProgressionsTests.hs
