@@ -1,7 +1,7 @@
 module NotesToEuterpea where
 
 import Euterpea 
-import qualified NeoRiemann (Note(..), NoteClass(..), Triad(..)) 
+import qualified NeoRiemann (Note(..), NoteClass(..), Triad(..), raise) 
 
 -- | Convert a NeoRiemann Note to Euterpea's Pitch
 noteToEuterpea :: NeoRiemann.Note -> Pitch
@@ -22,27 +22,30 @@ noteToEuterpea ( NeoRiemann.Note nc oct) =
   in (pc,oct)
 
 -- | Convert a NeoRiemann Note to Euterpea's Music Pitch
-sound :: NeoRiemann.Note -> Dur -> Music Pitch
-sound note' dur' = 
+sound :: Dur -> NeoRiemann.Note -> Music Pitch
+sound dur' note' = 
   note dur' (noteToEuterpea note')
 
 -- | Play a NeoRiemann Triad as Euterpea Music Pitch
 renderTriad :: Dur -> NeoRiemann.Triad -> Music Pitch
 renderTriad dur' (NeoRiemann.Triad root third fifth _) = 
   -- Play the three notes as a chord (simultaneously)
-  let chord' = chord  [sound root dur', 
-         sound  third dur', 
-         sound fifth dur' ]
+  let chord' = chord  [sound dur' root , 
+         sound  dur' third , 
+         sound dur' fifth  ]
     in chord'  :+: rest (1/4)
 
 renderArpTriad :: Dur -> NeoRiemann.Triad -> Music Pitch
 renderArpTriad dr (NeoRiemann.Triad root third fifth _) = 
   -- Play the three notes as a chord (simultaneously)
-  let chord' = chord  [sound root dr, 
-         sound  third dr, 
-         sound fifth dr ]
-      mel = sound root (dr/4) :+: sound third (dr/4) :+: sound fifth (dr/4)
-    in ( mel :=: chord'):+:  rest (1/4)
+  let chord' = chord  [sound dr root , 
+         sound  dr third , 
+         sound dr fifth  ]
+      upOctave = flip NeoRiemann.raise  12
+      mel = map (sound (dr/4) . upOctave ) [root , third , fifth]
+      melMuic = foldl1 (:+:) mel
+
+    in (melMuic :=: chord'):+:  rest (1/4)
     
 renderTriadSequence :: Dur -> [NeoRiemann.Triad] -> Music Pitch
 renderTriadSequence dur' triads =  foldr1 (:+:) $ map (renderTriad dur') triads

@@ -7,11 +7,11 @@ run:
 		--key C \
 		--verbose \
 		--mood major \
-		--progression "I-V-vi-IV" \
-		--duration 16 \
+		--progression "I-IV-V-I" \
+		--duration 1 \
 		--context 10 \
-		--play 
-#		--midi output.mid
+		--play  \
+		--midi chorus.mid
 #		--transform R,L,P,L \
 
 test:
