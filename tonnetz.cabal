@@ -97,15 +97,13 @@ executable tonnetz
     -- Base language which the package is written in.
     default-language: GHC2021
 
-Test-Suite tonnetez-tests
+Test-Suite tonnetz-tests
   type: exitcode-stdio-1.0
-  other-modules:                  
-                 , TonnetzCommands
+  default-language: GHC2021
+  other-modules:    
                  , FisherYates
                  , NeoRiemann
-                 , NeoRiemannGraph
-                 , Tonnetz
-                 , TonnetzTests
+                 , Progressions
   build-depends:    base
                     ,containers
                     ,hashable
@@ -122,3 +120,17 @@ Test-Suite tonnetez-tests
   hs-source-dirs:
       tests, lib
   main-is: TonnetzTests.hs
+  
+Test-Suite progressions-tests
+  type: exitcode-stdio-1.0
+  default-language: GHC2021
+  other-modules:
+                 , NeoRiemann
+                 , Progressions
+  build-depends:    base
+                    ,hspec
+                    ,Euterpea
+                    ,modular-arithmetic
+  hs-source-dirs:
+      tests, lib
+  main-is: ProgressionsTests.hs

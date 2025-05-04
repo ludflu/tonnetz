@@ -8,8 +8,9 @@ run:
 		--verbose \
 		--mood major \
 		--transform R,L,P,L \
-		--duration 4 \
+		--duration 16 \
 		--context 10 \
+		--play \
 		--midi output.mid
 
 test:

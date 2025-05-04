@@ -35,7 +35,6 @@ instance Show Triad where
     show (Triad r t f crumbs) = "Triad: " ++ show r ++ " " ++ show t ++ " " ++ show f 
 
 instance Show NoteClass where
-    show :: NoteClass -> String
     show C  = "C"
     show Cs = "C#"
     show D  = "D"
@@ -199,3 +198,4 @@ makeScale :: ScaleFamily -> Note ->  [Note]
 makeScale (ScaleFamily ptn) n  = let translateNote = raise n 
                                      semis = patternToSemitones ptn
                                   in map translateNote semis
+
