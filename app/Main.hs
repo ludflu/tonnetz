@@ -9,7 +9,7 @@ import TonnetzCommands
 import Options.Applicative (execParser)
 import Diagrams.Backend.SVG (renderSVG)
 import qualified Data.Map as M
-import System.Random
+import System.Random ( getStdGen )
 import FisherYates
 import Control.Monad (unless, when)
 import NotesToEuterpea (playTriads, writeTriads)
@@ -29,7 +29,7 @@ run args = do
   let startingTriad = makeTriad (startingKey args) (startingMood args)
       transforms = fromMaybe allTransformations (transformations args)
       progressions = fromMaybe [] (progression args)
-      (randomTransforms, _) = fisherYates gen transforms
+      (randomTransforms, _) = shuffle gen transforms
       tfs = case randomize args of 
         Just r -> take r randomTransforms
         Nothing -> transforms
@@ -48,8 +48,8 @@ run args = do
    in do when (verbose args) (print args )
          when (verbose args) (print tfs )
          when (verbose args) (print progressions )
-         when (play args) $ playTriads triads (duration args)  
-         when (isJust $ midi args) $ writeTriads (fromJust $ midi args)   triads (duration args)
+         when (play args) $ playTriads gen triads (duration args)  
+         when (isJust $ midi args) $ writeTriads gen (fromJust $ midi args)   triads (duration args)
          mapM_ (\t -> do
                    putStrLn $ "Triad: " ++ show t ++ " Mood: " ++ show (findMood t)
                    let Triad _ _ _ crumbs = t

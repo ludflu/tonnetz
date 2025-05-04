@@ -7,7 +7,7 @@ run:
 		--key C \
 		--verbose \
 		--mood major \
-		--progression "I-IV-V-I" \
+		--progression "vi-IV-V-I-IV-V-I" \
 		--duration 1 \
 		--context 10 \
 		--play  \

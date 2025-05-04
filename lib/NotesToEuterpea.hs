@@ -2,6 +2,8 @@ module NotesToEuterpea where
 
 import Euterpea 
 import qualified NeoRiemann (Note(..), NoteClass(..), Triad(..), raise) 
+import System.Random ( StdGen )
+import FisherYates
 
 -- | Convert a NeoRiemann Note to Euterpea's Pitch
 noteToEuterpea :: NeoRiemann.Note -> Pitch
@@ -35,14 +37,16 @@ renderTriad dur' (NeoRiemann.Triad root third fifth _) =
          sound dur' fifth  ]
     in chord'  :+: rest (1/4)
 
-renderArpTriad :: Dur -> NeoRiemann.Triad -> Music Pitch
-renderArpTriad dr (NeoRiemann.Triad root third fifth _) = 
+renderArpTriad :: StdGen -> Dur -> NeoRiemann.Triad -> Music Pitch
+renderArpTriad gen dr (NeoRiemann.Triad root third fifth _) = 
   -- Play the three notes as a chord (simultaneously)
   let chord' = chord  [sound dr root , 
          sound  dr third , 
          sound dr fifth  ]
       upOctave = flip NeoRiemann.raise  12
-      mel = map (sound (dr/4) . upOctave ) [root , third , fifth]
+      (randomChordTone,_) =  shuffle gen [root , third , fifth]
+      rnote = head randomChordTone
+      mel = map (sound (dr/4) . upOctave ) [root , third , fifth, rnote]
       melMuic = foldl1 (:+:) mel
 
     in (melMuic :=: chord'):+:  rest (1/4)
@@ -50,19 +54,19 @@ renderArpTriad dr (NeoRiemann.Triad root third fifth _) =
 renderTriadSequence :: Dur -> [NeoRiemann.Triad] -> Music Pitch
 renderTriadSequence dur' triads =  foldr1 (:+:) $ map (renderTriad dur') triads
 
-renderArpTriadSequence :: Dur -> [NeoRiemann.Triad] -> Music Pitch
-renderArpTriadSequence dr triads =  foldr1 (:+:) $ map (renderArpTriad dr) triads
+renderArpTriadSequence :: StdGen -> Dur -> [NeoRiemann.Triad] -> Music Pitch
+renderArpTriadSequence gen dr triads =  foldr1 (:+:) $ map (renderArpTriad gen dr) triads
 
 
-playTriads :: [NeoRiemann.Triad] -> Integer -> IO ()
-playTriads triads dur' = do
+playTriads :: StdGen -> [NeoRiemann.Triad] -> Integer -> IO ()
+playTriads gen triads dur' = do
   let duration' = 1 / fromIntegral dur' :: Dur
-      music = renderArpTriadSequence duration' triads 
+      music = renderArpTriadSequence gen duration' triads 
    in play $ rest duration' :+: music :+: rest duration'
 
 
-writeTriads :: FilePath -> [NeoRiemann.Triad] -> Integer -> IO ()
-writeTriads fp triads dur' = do
+writeTriads :: StdGen -> FilePath -> [NeoRiemann.Triad] -> Integer -> IO ()
+writeTriads gen fp triads dur' = do
   let duration' = 1 / fromIntegral dur' :: Dur
-      music = renderArpTriadSequence duration' triads 
+      music = renderArpTriadSequence gen duration' triads 
    in writeMidi fp $ rest duration' :+: music :+: rest duration'
