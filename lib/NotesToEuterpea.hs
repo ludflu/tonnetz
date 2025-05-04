@@ -2,7 +2,7 @@ module NotesToEuterpea where
 
 import Euterpea 
 import qualified NeoRiemann (Note(..), NoteClass(..), Triad(..), raise) 
-import System.Random ( StdGen )
+import System.Random ( StdGen, split )
 import FisherYates
 
 -- | Convert a NeoRiemann Note to Euterpea's Pitch
@@ -55,7 +55,13 @@ renderTriadSequence :: Dur -> [NeoRiemann.Triad] -> Music Pitch
 renderTriadSequence dur' triads =  foldr1 (:+:) $ map (renderTriad dur') triads
 
 renderArpTriadSequence :: StdGen -> Dur -> [NeoRiemann.Triad] -> Music Pitch
-renderArpTriadSequence gen dr triads =  foldr1 (:+:) $ map (renderArpTriad gen dr) triads
+renderArpTriadSequence gen dr triads = 
+  let (musicPieces, _) = foldl (\(pieces, g) triad -> 
+                                  let (nextGen, newGen) = split g
+                                      piece = renderArpTriad nextGen dr triad
+                                  in (pieces ++ [piece], newGen)) 
+                               ([], gen) triads
+  in foldr1 (:+:) musicPieces
 
 
 playTriads :: StdGen -> [NeoRiemann.Triad] -> Integer -> IO ()
