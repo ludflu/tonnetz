@@ -4,12 +4,14 @@ module TonnetzCommands where
 
 import Options.Applicative
 import NeoRiemann
+import Progressions
 
 
 data CommandArgs = CommandArgs
   { startingKey :: NoteClass,
      startingMood :: Mood,
    transformations :: Maybe [Transform],
+   progression :: Maybe [(Progression,Mood)],
    contextSize :: Int,
    duration :: Integer,
    randomize :: Maybe Int,
@@ -25,6 +27,9 @@ parseMood = eitherReader $ \s -> case s of
   "major" -> Right Major
   "minor" -> Right Minor
   _       -> Left $ "Invalid mood: " ++ s
+
+parseProgression :: ReadM [(Progression,Mood)]
+parseProgression = eitherReader readProgressions
 
 parseTransform :: ReadM Transform
 parseTransform = eitherReader $ \s ->
@@ -97,6 +102,11 @@ commandArgs = CommandArgs
       <> short 't'
       <> metavar "TRANSFORMS"
       <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H) where:\n   L: Leading, P: Parallel, R: Relative, N: Nebenverwandt, S: Slide, H: Hexapole"))
+  <*> optional (option parseProgression
+      ( long "progression"
+      <> short 'p'
+      <> metavar "PROGRESSIONS"
+      <> help "Chord progressions to apply (I-V-vi-IV)"))
   <*> option auto
       ( long "context"
       <> short 'c'
