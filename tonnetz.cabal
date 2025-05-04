@@ -104,6 +104,8 @@ Test-Suite tonnetz-tests
                  , FisherYates
                  , NeoRiemann
                  , Progressions
+                 , ProgressionsTests
+                 , NeoRiemannTests
   build-depends:    base
                     ,containers
                     ,hashable
@@ -117,7 +119,6 @@ Test-Suite tonnetz-tests
                     ,array
                     ,tasty
                     ,tasty-hunit
-                    -- , ProgressionsTests
   hs-source-dirs:
       tests, lib
   main-is: TonnetzTests.hs

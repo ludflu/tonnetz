@@ -9,12 +9,12 @@ import NeoRiemann
 import Progressions
 
 import ProgressionsTests
-
+import NeoRiemannTests
 
 
 
 allTests :: TestTree
-allTests = testGroup "All Tests" [progTests]
+allTests = testGroup "All Tests" [progTests,neoRiemannTests]
 
 main :: IO ()
 main = defaultMain allTests
