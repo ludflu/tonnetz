@@ -7,11 +7,12 @@ run:
 		--key C \
 		--verbose \
 		--mood major \
-		--transform R,L,P,L \
+		--progression "I-V-vi-IV" \
 		--duration 16 \
 		--context 10 \
-		--play \
-		--midi output.mid
+		--play 
+#		--midi output.mid
+#		--transform R,L,P,L \
 
 test:
 	cabal test

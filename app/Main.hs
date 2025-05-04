@@ -14,6 +14,7 @@ import FisherYates
 import Control.Monad (unless, when)
 import NotesToEuterpea (playTriads, writeTriads)
 import Data.Maybe (fromMaybe, isJust, fromJust)
+import Progressions (makeProgressions)
 
 makeTriad :: NoteClass -> Mood -> Triad
 makeTriad nc m = case m of
@@ -27,17 +28,26 @@ run args = do
   gen <- getStdGen
   let startingTriad = makeTriad (startingKey args) (startingMood args)
       transforms = fromMaybe allTransformations (transformations args)
+      progressions = fromMaybe [] (progression args)
       (randomTransforms, _) = fisherYates gen transforms
       tfs = case randomize args of 
         Just r -> take r randomTransforms
         Nothing -> transforms
-      triads = applyTransforms startingTriad tfs
+
+      chordProgressionTriads = makeProgressions startingTriad progressions 
+      neoRiemanntriads = applyTransforms startingTriad tfs
+
+      triads = if null chordProgressionTriads 
+        then neoRiemanntriads
+        else chordProgressionTriads
+
       transformedTriads = zip (startingTriad : triads) tfs
       triadNames =  map (show . cleanCrumbs) triads
       numberedTriads = M.fromList  $ zip triadNames [1..]
       tonnetz = drawTonnetez startingTriad transformedTriads (contextSize args) numberedTriads
    in do when (verbose args) (print args )
          when (verbose args) (print tfs )
+         when (verbose args) (print progressions )
          when (play args) $ playTriads triads (duration args)  
          when (isJust $ midi args) $ writeTriads (fromJust $ midi args)   triads (duration args)
          mapM_ (\t -> do

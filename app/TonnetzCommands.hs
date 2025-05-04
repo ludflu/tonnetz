@@ -104,7 +104,6 @@ commandArgs = CommandArgs
       <> help "Transformations to apply (comma-delimited, e.g., L,P,R,N,S,H) where:\n   L: Leading, P: Parallel, R: Relative, N: Nebenverwandt, S: Slide, H: Hexapole"))
   <*> optional (option parseProgression
       ( long "progression"
-      <> short 'p'
       <> metavar "PROGRESSIONS"
       <> help "Chord progressions to apply (I-V-vi-IV)"))
   <*> option auto
